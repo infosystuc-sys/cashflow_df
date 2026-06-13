@@ -78,10 +78,15 @@ export function MoneyInput({
 }) {
   const [text, setText] = useState(value ? money(value) : "");
   const ref = useRef<HTMLInputElement>(null);
+  const focused = useRef(false);
 
   useEffect(() => {
     if (autoFocus && ref.current) ref.current.focus();
   }, [autoFocus]);
+
+  useEffect(() => {
+    if (!focused.current) setText(value ? money(value) : "");
+  }, [value]);
 
   return (
     <input
@@ -90,11 +95,15 @@ export function MoneyInput({
       inputMode="decimal"
       placeholder={placeholder}
       value={text}
+      onFocus={() => {
+        focused.current = true;
+      }}
       onChange={(e) => {
         setText(e.target.value);
         onChange(parseNum(e.target.value));
       }}
       onBlur={(e) => {
+        focused.current = false;
         const v = parseNum(e.target.value);
         setText(v ? money(v) : "");
       }}
