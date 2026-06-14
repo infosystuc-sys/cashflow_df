@@ -70,7 +70,7 @@ export default function MovimientosPage() {
       <BankSummaryCard summary={summary} bankId={bankId} />
 
       <div className="table-wrap">
-        <table className="grid">
+        <table className="grid mov-table">
           <thead>
             <tr>
               <th className="c-desc">Descripción</th>

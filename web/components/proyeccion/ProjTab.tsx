@@ -38,6 +38,7 @@ export function ProjTab({ state, months }: { state: CashflowState; months: strin
             <span className="mrow-name">{c.name}</span>
             <span className="mrow-unit">{c.unidad}</span>
           </td>
+          <td className="c-cell c-total"><Money v={rowTotal(c.id)} decimals={false} bold /></td>
           {months.map((mk) => {
             const t = projTotal(state, c.id, mk);
             const cell = state.projection[c.id][mk];
@@ -50,15 +51,14 @@ export function ProjTab({ state, months }: { state: CashflowState; months: strin
               </td>
             );
           })}
-          <td className="c-cell c-total"><Money v={rowTotal(c.id)} decimals={false} bold /></td>
         </tr>
       ))}
       <tr className="mrow mrow--total">
         <td className="c-rowhead sticky-col"><strong>Total Ingresos Proyectados</strong></td>
-        {months.map((mk) => (
-          <td key={mk} className="c-cell c-total"><Money v={colTotal(mk)} decimals={false} bold /></td>
-        ))}
         <td className="c-cell c-total"><Money v={grand} decimals={false} bold /></td>
+        {months.map((mk) => (
+          <td key={mk} className="c-cell"><Money v={colTotal(mk)} decimals={false} bold /></td>
+        ))}
       </tr>
       {edit && concept && (
         <CellQPEditor

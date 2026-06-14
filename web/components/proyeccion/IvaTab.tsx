@@ -28,6 +28,7 @@ export function IvaTab({ state, months }: { state: CashflowState; months: string
       {IVA_ROWS.map((r) => (
         <tr key={r} className="mrow">
           <td className="c-rowhead sticky-col"><span className="mrow-name">{r}</span></td>
+          <td className="c-cell c-total"><Money v={rowTotal(r)} decimals={false} bold /></td>
           {months.map((mk) => {
             const v = state.iva[r]?.[mk] || 0;
             return (
@@ -36,15 +37,14 @@ export function IvaTab({ state, months }: { state: CashflowState; months: string
               </td>
             );
           })}
-          <td className="c-cell c-total"><Money v={rowTotal(r)} decimals={false} bold /></td>
         </tr>
       ))}
       <tr className="mrow mrow--total">
         <td className="c-rowhead sticky-col"><strong>S/ Libro IVA Ventas</strong></td>
-        {months.map((mk) => (
-          <td key={mk} className="c-cell c-total"><Money v={colTotal(mk)} decimals={false} bold /></td>
-        ))}
         <td className="c-cell c-total"><Money v={months.reduce((a, mk) => a + colTotal(mk), 0)} decimals={false} bold /></td>
+        {months.map((mk) => (
+          <td key={mk} className="c-cell"><Money v={colTotal(mk)} decimals={false} bold /></td>
+        ))}
       </tr>
       {edit && (
         <CellMoneyEditor

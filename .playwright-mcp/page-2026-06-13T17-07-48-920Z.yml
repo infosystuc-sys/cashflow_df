@@ -1,0 +1,361 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: $
+        - generic [ref=e6]:
+          - strong [ref=e7]: CASHFLOW
+          - generic [ref=e8]: Galicia · Nación
+        - button "Replegar menú" [ref=e9] [cursor=pointer]: «
+      - navigation [ref=e10]:
+        - button "↹ Movimientos" [ref=e11] [cursor=pointer]:
+          - generic [ref=e12]: ↹
+          - generic [ref=e13]: Movimientos
+        - button "◳ Proyección" [active] [ref=e14] [cursor=pointer]:
+          - generic [ref=e15]: ◳
+          - generic [ref=e16]: Proyección
+        - button "▦ Cashflow" [ref=e17] [cursor=pointer]:
+          - generic [ref=e18]: ▦
+          - generic [ref=e19]: Cashflow
+        - button "⚙ Ajustes" [ref=e20] [cursor=pointer]:
+          - generic [ref=e21]: ⚙
+          - generic [ref=e22]: Ajustes
+      - generic [ref=e23]:
+        - generic [ref=e24]: Cierre Banco + FCI
+        - generic [ref=e25]: 275.831.578
+    - main [ref=e26]:
+      - generic [ref=e549]:
+        - generic [ref=e551]:
+          - heading "Proyección" [level=1] [ref=e552]
+          - paragraph [ref=e553]: Tocá cualquier celda para cargar valores. Los totales alimentan el Cashflow.
+        - generic [ref=e554]:
+          - button "Ingresos proyectados" [ref=e555] [cursor=pointer]
+          - button "FCI / Inversiones" [ref=e556] [cursor=pointer]
+          - button "Ventas netas IVA" [ref=e557] [cursor=pointer]
+        - table [ref=e559]:
+          - rowgroup [ref=e560]:
+            - row "Concepto proyectado jul-25 ago-25 sep-25 oct-25 nov-25 dic-25 ene-26 feb-26 mar-26 abr-26 may-26 jun-26 jul-26 ago-26 sep-26 oct-26 nov-26 dic-26 ene-27 feb-27 mar-27 Total" [ref=e561]:
+              - columnheader "Concepto proyectado" [ref=e562]
+              - columnheader "jul-25" [ref=e563]
+              - columnheader "ago-25" [ref=e564]
+              - columnheader "sep-25" [ref=e565]
+              - columnheader "oct-25" [ref=e566]
+              - columnheader "nov-25" [ref=e567]
+              - columnheader "dic-25" [ref=e568]
+              - columnheader "ene-26" [ref=e569]
+              - columnheader "feb-26" [ref=e570]
+              - columnheader "mar-26" [ref=e571]
+              - columnheader "abr-26" [ref=e572]
+              - columnheader "may-26" [ref=e573]
+              - columnheader "jun-26" [ref=e574]
+              - columnheader "jul-26" [ref=e575]
+              - columnheader "ago-26" [ref=e576]
+              - columnheader "sep-26" [ref=e577]
+              - columnheader "oct-26" [ref=e578]
+              - columnheader "nov-26" [ref=e579]
+              - columnheader "dic-26" [ref=e580]
+              - columnheader "ene-27" [ref=e581]
+              - columnheader "feb-27" [ref=e582]
+              - columnheader "mar-27" [ref=e583]
+              - columnheader "Total" [ref=e584]
+          - rowgroup [ref=e585]:
+            - row "Azúcar Bolsas 175.000.000 7.000×25.000 175.000.000 7.000×25.000 175.000.000 7.000×25.000 175.000.000 7.000×25.000 175.000.000 7.000×25.000 175.000.000 7.000×25.000 + + + + + + + + + + + + + + + 1.050.000.000" [ref=e586]:
+              - cell "Azúcar Bolsas" [ref=e587]:
+                - generic [ref=e588]: Azúcar
+                - generic [ref=e589]: Bolsas
+              - cell "175.000.000 7.000×25.000" [ref=e590] [cursor=pointer]:
+                - text: 175.000.000
+                - generic [ref=e591]: 7.000×25.000
+              - cell "175.000.000 7.000×25.000" [ref=e592] [cursor=pointer]:
+                - text: 175.000.000
+                - generic [ref=e593]: 7.000×25.000
+              - cell "175.000.000 7.000×25.000" [ref=e594] [cursor=pointer]:
+                - text: 175.000.000
+                - generic [ref=e595]: 7.000×25.000
+              - cell "175.000.000 7.000×25.000" [ref=e596] [cursor=pointer]:
+                - text: 175.000.000
+                - generic [ref=e597]: 7.000×25.000
+              - cell "175.000.000 7.000×25.000" [ref=e598] [cursor=pointer]:
+                - text: 175.000.000
+                - generic [ref=e599]: 7.000×25.000
+              - cell "175.000.000 7.000×25.000" [ref=e600] [cursor=pointer]:
+                - text: 175.000.000
+                - generic [ref=e601]: 7.000×25.000
+              - cell "+" [ref=e602] [cursor=pointer]
+              - cell "+" [ref=e603] [cursor=pointer]
+              - cell "+" [ref=e604] [cursor=pointer]
+              - cell "+" [ref=e605] [cursor=pointer]
+              - cell "+" [ref=e606] [cursor=pointer]
+              - cell "+" [ref=e607] [cursor=pointer]
+              - cell "+" [ref=e608] [cursor=pointer]
+              - cell "+" [ref=e609] [cursor=pointer]
+              - cell "+" [ref=e610] [cursor=pointer]
+              - cell "+" [ref=e611] [cursor=pointer]
+              - cell "+" [ref=e612] [cursor=pointer]
+              - cell "+" [ref=e613] [cursor=pointer]
+              - cell "+" [ref=e614] [cursor=pointer]
+              - cell "+" [ref=e615] [cursor=pointer]
+              - cell "+" [ref=e616] [cursor=pointer]
+              - cell "1.050.000.000" [ref=e617] [cursor=pointer]
+            - row "Soja TN + + + + + + + + + + + + + + + + + + + + + -" [ref=e618]:
+              - cell "Soja TN" [ref=e619]:
+                - generic [ref=e620]: Soja
+                - generic [ref=e621]: TN
+              - cell "+" [ref=e622] [cursor=pointer]
+              - cell "+" [ref=e623] [cursor=pointer]
+              - cell "+" [ref=e624] [cursor=pointer]
+              - cell "+" [ref=e625] [cursor=pointer]
+              - cell "+" [ref=e626] [cursor=pointer]
+              - cell "+" [ref=e627] [cursor=pointer]
+              - cell "+" [ref=e628] [cursor=pointer]
+              - cell "+" [ref=e629] [cursor=pointer]
+              - cell "+" [ref=e630] [cursor=pointer]
+              - cell "+" [ref=e631] [cursor=pointer]
+              - cell "+" [ref=e632] [cursor=pointer]
+              - cell "+" [ref=e633] [cursor=pointer]
+              - cell "+" [ref=e634] [cursor=pointer]
+              - cell "+" [ref=e635] [cursor=pointer]
+              - cell "+" [ref=e636] [cursor=pointer]
+              - cell "+" [ref=e637] [cursor=pointer]
+              - cell "+" [ref=e638] [cursor=pointer]
+              - cell "+" [ref=e639] [cursor=pointer]
+              - cell "+" [ref=e640] [cursor=pointer]
+              - cell "+" [ref=e641] [cursor=pointer]
+              - cell "+" [ref=e642] [cursor=pointer]
+              - cell "-" [ref=e643] [cursor=pointer]
+            - row "Maíz TN + + + + + + + + + + + + + + + + + + + + + -" [ref=e644]:
+              - cell "Maíz TN" [ref=e645]:
+                - generic [ref=e646]: Maíz
+                - generic [ref=e647]: TN
+              - cell "+" [ref=e648] [cursor=pointer]
+              - cell "+" [ref=e649] [cursor=pointer]
+              - cell "+" [ref=e650] [cursor=pointer]
+              - cell "+" [ref=e651] [cursor=pointer]
+              - cell "+" [ref=e652] [cursor=pointer]
+              - cell "+" [ref=e653] [cursor=pointer]
+              - cell "+" [ref=e654] [cursor=pointer]
+              - cell "+" [ref=e655] [cursor=pointer]
+              - cell "+" [ref=e656] [cursor=pointer]
+              - cell "+" [ref=e657] [cursor=pointer]
+              - cell "+" [ref=e658] [cursor=pointer]
+              - cell "+" [ref=e659] [cursor=pointer]
+              - cell "+" [ref=e660] [cursor=pointer]
+              - cell "+" [ref=e661] [cursor=pointer]
+              - cell "+" [ref=e662] [cursor=pointer]
+              - cell "+" [ref=e663] [cursor=pointer]
+              - cell "+" [ref=e664] [cursor=pointer]
+              - cell "+" [ref=e665] [cursor=pointer]
+              - cell "+" [ref=e666] [cursor=pointer]
+              - cell "+" [ref=e667] [cursor=pointer]
+              - cell "+" [ref=e668] [cursor=pointer]
+              - cell "-" [ref=e669] [cursor=pointer]
+            - row "Sorgo TN + + + + + + + + + + + + + + + + + + + + + -" [ref=e670]:
+              - cell "Sorgo TN" [ref=e671]:
+                - generic [ref=e672]: Sorgo
+                - generic [ref=e673]: TN
+              - cell "+" [ref=e674] [cursor=pointer]
+              - cell "+" [ref=e675] [cursor=pointer]
+              - cell "+" [ref=e676] [cursor=pointer]
+              - cell "+" [ref=e677] [cursor=pointer]
+              - cell "+" [ref=e678] [cursor=pointer]
+              - cell "+" [ref=e679] [cursor=pointer]
+              - cell "+" [ref=e680] [cursor=pointer]
+              - cell "+" [ref=e681] [cursor=pointer]
+              - cell "+" [ref=e682] [cursor=pointer]
+              - cell "+" [ref=e683] [cursor=pointer]
+              - cell "+" [ref=e684] [cursor=pointer]
+              - cell "+" [ref=e685] [cursor=pointer]
+              - cell "+" [ref=e686] [cursor=pointer]
+              - cell "+" [ref=e687] [cursor=pointer]
+              - cell "+" [ref=e688] [cursor=pointer]
+              - cell "+" [ref=e689] [cursor=pointer]
+              - cell "+" [ref=e690] [cursor=pointer]
+              - cell "+" [ref=e691] [cursor=pointer]
+              - cell "+" [ref=e692] [cursor=pointer]
+              - cell "+" [ref=e693] [cursor=pointer]
+              - cell "+" [ref=e694] [cursor=pointer]
+              - cell "-" [ref=e695] [cursor=pointer]
+            - row "Fletes $ 80.000.000 100.000.000 100.000.000 + + + + + + + + + + + + + + + + + + 280.000.000" [ref=e696]:
+              - cell "Fletes $" [ref=e697]:
+                - generic [ref=e698]: Fletes
+                - generic [ref=e699]: $
+              - cell "80.000.000" [ref=e700] [cursor=pointer]
+              - cell "100.000.000" [ref=e701] [cursor=pointer]
+              - cell "100.000.000" [ref=e702] [cursor=pointer]
+              - cell "+" [ref=e703] [cursor=pointer]
+              - cell "+" [ref=e704] [cursor=pointer]
+              - cell "+" [ref=e705] [cursor=pointer]
+              - cell "+" [ref=e706] [cursor=pointer]
+              - cell "+" [ref=e707] [cursor=pointer]
+              - cell "+" [ref=e708] [cursor=pointer]
+              - cell "+" [ref=e709] [cursor=pointer]
+              - cell "+" [ref=e710] [cursor=pointer]
+              - cell "+" [ref=e711] [cursor=pointer]
+              - cell "+" [ref=e712] [cursor=pointer]
+              - cell "+" [ref=e713] [cursor=pointer]
+              - cell "+" [ref=e714] [cursor=pointer]
+              - cell "+" [ref=e715] [cursor=pointer]
+              - cell "+" [ref=e716] [cursor=pointer]
+              - cell "+" [ref=e717] [cursor=pointer]
+              - cell "+" [ref=e718] [cursor=pointer]
+              - cell "+" [ref=e719] [cursor=pointer]
+              - cell "+" [ref=e720] [cursor=pointer]
+              - cell "280.000.000" [ref=e721] [cursor=pointer]
+            - row "Carleto $ + + + + + + + + + + + + + + + + + + + + + -" [ref=e722]:
+              - cell "Carleto $" [ref=e723]:
+                - generic [ref=e724]: Carleto
+                - generic [ref=e725]: $
+              - cell "+" [ref=e726] [cursor=pointer]
+              - cell "+" [ref=e727] [cursor=pointer]
+              - cell "+" [ref=e728] [cursor=pointer]
+              - cell "+" [ref=e729] [cursor=pointer]
+              - cell "+" [ref=e730] [cursor=pointer]
+              - cell "+" [ref=e731] [cursor=pointer]
+              - cell "+" [ref=e732] [cursor=pointer]
+              - cell "+" [ref=e733] [cursor=pointer]
+              - cell "+" [ref=e734] [cursor=pointer]
+              - cell "+" [ref=e735] [cursor=pointer]
+              - cell "+" [ref=e736] [cursor=pointer]
+              - cell "+" [ref=e737] [cursor=pointer]
+              - cell "+" [ref=e738] [cursor=pointer]
+              - cell "+" [ref=e739] [cursor=pointer]
+              - cell "+" [ref=e740] [cursor=pointer]
+              - cell "+" [ref=e741] [cursor=pointer]
+              - cell "+" [ref=e742] [cursor=pointer]
+              - cell "+" [ref=e743] [cursor=pointer]
+              - cell "+" [ref=e744] [cursor=pointer]
+              - cell "+" [ref=e745] [cursor=pointer]
+              - cell "+" [ref=e746] [cursor=pointer]
+              - cell "-" [ref=e747] [cursor=pointer]
+            - row "Servicios $ 20.000.000 + + + + + + + + + + + + + + + + + + + + 20.000.000" [ref=e748]:
+              - cell "Servicios $" [ref=e749]:
+                - generic [ref=e750]: Servicios
+                - generic [ref=e751]: $
+              - cell "20.000.000" [ref=e752] [cursor=pointer]
+              - cell "+" [ref=e753] [cursor=pointer]
+              - cell "+" [ref=e754] [cursor=pointer]
+              - cell "+" [ref=e755] [cursor=pointer]
+              - cell "+" [ref=e756] [cursor=pointer]
+              - cell "+" [ref=e757] [cursor=pointer]
+              - cell "+" [ref=e758] [cursor=pointer]
+              - cell "+" [ref=e759] [cursor=pointer]
+              - cell "+" [ref=e760] [cursor=pointer]
+              - cell "+" [ref=e761] [cursor=pointer]
+              - cell "+" [ref=e762] [cursor=pointer]
+              - cell "+" [ref=e763] [cursor=pointer]
+              - cell "+" [ref=e764] [cursor=pointer]
+              - cell "+" [ref=e765] [cursor=pointer]
+              - cell "+" [ref=e766] [cursor=pointer]
+              - cell "+" [ref=e767] [cursor=pointer]
+              - cell "+" [ref=e768] [cursor=pointer]
+              - cell "+" [ref=e769] [cursor=pointer]
+              - cell "+" [ref=e770] [cursor=pointer]
+              - cell "+" [ref=e771] [cursor=pointer]
+              - cell "+" [ref=e772] [cursor=pointer]
+              - cell "20.000.000" [ref=e773] [cursor=pointer]
+            - row "Ingresos (Cheques de terceros) $ + 344.000.000 + + + + + + + + + + + + + + + + + + + 344.000.000" [ref=e774]:
+              - cell "Ingresos (Cheques de terceros) $" [ref=e775]:
+                - generic [ref=e776]: Ingresos (Cheques de terceros)
+                - generic [ref=e777]: $
+              - cell "+" [ref=e778] [cursor=pointer]
+              - cell "344.000.000" [ref=e779] [cursor=pointer]
+              - cell "+" [ref=e780] [cursor=pointer]
+              - cell "+" [ref=e781] [cursor=pointer]
+              - cell "+" [ref=e782] [cursor=pointer]
+              - cell "+" [ref=e783] [cursor=pointer]
+              - cell "+" [ref=e784] [cursor=pointer]
+              - cell "+" [ref=e785] [cursor=pointer]
+              - cell "+" [ref=e786] [cursor=pointer]
+              - cell "+" [ref=e787] [cursor=pointer]
+              - cell "+" [ref=e788] [cursor=pointer]
+              - cell "+" [ref=e789] [cursor=pointer]
+              - cell "+" [ref=e790] [cursor=pointer]
+              - cell "+" [ref=e791] [cursor=pointer]
+              - cell "+" [ref=e792] [cursor=pointer]
+              - cell "+" [ref=e793] [cursor=pointer]
+              - cell "+" [ref=e794] [cursor=pointer]
+              - cell "+" [ref=e795] [cursor=pointer]
+              - cell "+" [ref=e796] [cursor=pointer]
+              - cell "+" [ref=e797] [cursor=pointer]
+              - cell "+" [ref=e798] [cursor=pointer]
+              - cell "344.000.000" [ref=e799] [cursor=pointer]
+            - row "Cobranza Campo (neto blanqueo) $ + + + + + + + + + + + + + + + + + + + + + -" [ref=e800]:
+              - cell "Cobranza Campo (neto blanqueo) $" [ref=e801]:
+                - generic [ref=e802]: Cobranza Campo (neto blanqueo)
+                - generic [ref=e803]: $
+              - cell "+" [ref=e804] [cursor=pointer]
+              - cell "+" [ref=e805] [cursor=pointer]
+              - cell "+" [ref=e806] [cursor=pointer]
+              - cell "+" [ref=e807] [cursor=pointer]
+              - cell "+" [ref=e808] [cursor=pointer]
+              - cell "+" [ref=e809] [cursor=pointer]
+              - cell "+" [ref=e810] [cursor=pointer]
+              - cell "+" [ref=e811] [cursor=pointer]
+              - cell "+" [ref=e812] [cursor=pointer]
+              - cell "+" [ref=e813] [cursor=pointer]
+              - cell "+" [ref=e814] [cursor=pointer]
+              - cell "+" [ref=e815] [cursor=pointer]
+              - cell "+" [ref=e816] [cursor=pointer]
+              - cell "+" [ref=e817] [cursor=pointer]
+              - cell "+" [ref=e818] [cursor=pointer]
+              - cell "+" [ref=e819] [cursor=pointer]
+              - cell "+" [ref=e820] [cursor=pointer]
+              - cell "+" [ref=e821] [cursor=pointer]
+              - cell "+" [ref=e822] [cursor=pointer]
+              - cell "+" [ref=e823] [cursor=pointer]
+              - cell "+" [ref=e824] [cursor=pointer]
+              - cell "-" [ref=e825] [cursor=pointer]
+            - row "Compra Campo $ + + + + + + + + + + + + + + + + + + + + + -" [ref=e826]:
+              - cell "Compra Campo $" [ref=e827]:
+                - generic [ref=e828]: Compra Campo
+                - generic [ref=e829]: $
+              - cell "+" [ref=e830] [cursor=pointer]
+              - cell "+" [ref=e831] [cursor=pointer]
+              - cell "+" [ref=e832] [cursor=pointer]
+              - cell "+" [ref=e833] [cursor=pointer]
+              - cell "+" [ref=e834] [cursor=pointer]
+              - cell "+" [ref=e835] [cursor=pointer]
+              - cell "+" [ref=e836] [cursor=pointer]
+              - cell "+" [ref=e837] [cursor=pointer]
+              - cell "+" [ref=e838] [cursor=pointer]
+              - cell "+" [ref=e839] [cursor=pointer]
+              - cell "+" [ref=e840] [cursor=pointer]
+              - cell "+" [ref=e841] [cursor=pointer]
+              - cell "+" [ref=e842] [cursor=pointer]
+              - cell "+" [ref=e843] [cursor=pointer]
+              - cell "+" [ref=e844] [cursor=pointer]
+              - cell "+" [ref=e845] [cursor=pointer]
+              - cell "+" [ref=e846] [cursor=pointer]
+              - cell "+" [ref=e847] [cursor=pointer]
+              - cell "+" [ref=e848] [cursor=pointer]
+              - cell "+" [ref=e849] [cursor=pointer]
+              - cell "+" [ref=e850] [cursor=pointer]
+              - cell "-" [ref=e851] [cursor=pointer]
+            - row "Total Ingresos Proyectados 275.000.000 619.000.000 275.000.000 175.000.000 175.000.000 175.000.000 - - - - - - - - - - - - - - - 1.694.000.000" [ref=e852]:
+              - cell "Total Ingresos Proyectados" [ref=e853]:
+                - strong [ref=e854]: Total Ingresos Proyectados
+              - cell "275.000.000" [ref=e855]
+              - cell "619.000.000" [ref=e856]
+              - cell "275.000.000" [ref=e857]
+              - cell "175.000.000" [ref=e858]
+              - cell "175.000.000" [ref=e859]
+              - cell "175.000.000" [ref=e860]
+              - cell "-" [ref=e861]
+              - cell "-" [ref=e862]
+              - cell "-" [ref=e863]
+              - cell "-" [ref=e864]
+              - cell "-" [ref=e865]
+              - cell "-" [ref=e866]
+              - cell "-" [ref=e867]
+              - cell "-" [ref=e868]
+              - cell "-" [ref=e869]
+              - cell "-" [ref=e870]
+              - cell "-" [ref=e871]
+              - cell "-" [ref=e872]
+              - cell "-" [ref=e873]
+              - cell "-" [ref=e874]
+              - cell "-" [ref=e875]
+              - cell "1.694.000.000" [ref=e876]
+  - button "Open Next.js Dev Tools" [ref=e32] [cursor=pointer]:
+    - img [ref=e33]
+  - alert [ref=e315]

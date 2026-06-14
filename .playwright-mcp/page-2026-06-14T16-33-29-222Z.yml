@@ -1,0 +1,142 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: $
+        - generic [ref=e6]:
+          - strong [ref=e7]: CASHFLOW
+          - generic [ref=e8]: Galicia · Nación
+        - button "Replegar menú" [ref=e9] [cursor=pointer]: «
+      - navigation [ref=e10]:
+        - button "↹ Movimientos" [ref=e11] [cursor=pointer]:
+          - generic [ref=e12]: ↹
+          - generic [ref=e13]: Movimientos
+        - button "◳ Proyección" [ref=e14] [cursor=pointer]:
+          - generic [ref=e15]: ◳
+          - generic [ref=e16]: Proyección
+        - button "▦ Cashflow" [ref=e17] [cursor=pointer]:
+          - generic [ref=e18]: ▦
+          - generic [ref=e19]: Cashflow
+        - button "⚙ Ajustes" [ref=e20] [cursor=pointer]:
+          - generic [ref=e21]: ⚙
+          - generic [ref=e22]: Ajustes
+      - generic [ref=e23]:
+        - generic [ref=e24]: Cierre Banco + FCI
+        - generic [ref=e25]: 275.831.578
+    - main [ref=e26]:
+      - generic [ref=e37]:
+        - generic [ref=e39]:
+          - heading "Proyección" [level=1] [ref=e40]
+          - paragraph [ref=e41]: Tocá cualquier celda para cargar valores. Los totales alimentan el Cashflow.
+        - generic [ref=e42]:
+          - button "Ingresos proyectados" [ref=e43] [cursor=pointer]
+          - button "FCI / Inversiones" [active] [ref=e44] [cursor=pointer]
+          - button "Ventas netas IVA" [ref=e45] [cursor=pointer]
+        - generic [ref=e365]:
+          - generic [ref=e366]: Saldo Inicial FCI
+          - textbox "0,00" [ref=e368]
+        - table [ref=e370]:
+          - rowgroup [ref=e371]:
+            - row "FCI / Inversiones Total jul-25 ago-25 sep-25 oct-25 nov-25 dic-25 ene-26 feb-26 mar-26 abr-26 may-26 jun-26 jul-26 ago-26 sep-26 oct-26 nov-26 dic-26 ene-27 feb-27 mar-27" [ref=e372]:
+              - columnheader "FCI / Inversiones" [ref=e373]
+              - columnheader "Total" [ref=e374]
+              - columnheader "jul-25" [ref=e375]
+              - columnheader "ago-25" [ref=e376]
+              - columnheader "sep-25" [ref=e377]
+              - columnheader "oct-25" [ref=e378]
+              - columnheader "nov-25" [ref=e379]
+              - columnheader "dic-25" [ref=e380]
+              - columnheader "ene-26" [ref=e381]
+              - columnheader "feb-26" [ref=e382]
+              - columnheader "mar-26" [ref=e383]
+              - columnheader "abr-26" [ref=e384]
+              - columnheader "may-26" [ref=e385]
+              - columnheader "jun-26" [ref=e386]
+              - columnheader "jul-26" [ref=e387]
+              - columnheader "ago-26" [ref=e388]
+              - columnheader "sep-26" [ref=e389]
+              - columnheader "oct-26" [ref=e390]
+              - columnheader "nov-26" [ref=e391]
+              - columnheader "dic-26" [ref=e392]
+              - columnheader "ene-27" [ref=e393]
+              - columnheader "feb-27" [ref=e394]
+              - columnheader "mar-27" [ref=e395]
+          - rowgroup [ref=e396]:
+            - row "Suscripciones 760.364.223 260.000.000 450.100.000 50.264.223 + + + + + + + + + + + + + + + + + +" [ref=e397]:
+              - cell "Suscripciones" [ref=e398]:
+                - generic [ref=e399]: Suscripciones
+              - cell "760.364.223" [ref=e400] [cursor=pointer]
+              - cell "260.000.000" [ref=e401] [cursor=pointer]
+              - cell "450.100.000" [ref=e402] [cursor=pointer]
+              - cell "50.264.223" [ref=e403] [cursor=pointer]
+              - cell "+" [ref=e404] [cursor=pointer]
+              - cell "+" [ref=e405] [cursor=pointer]
+              - cell "+" [ref=e406] [cursor=pointer]
+              - cell "+" [ref=e407] [cursor=pointer]
+              - cell "+" [ref=e408] [cursor=pointer]
+              - cell "+" [ref=e409] [cursor=pointer]
+              - cell "+" [ref=e410] [cursor=pointer]
+              - cell "+" [ref=e411] [cursor=pointer]
+              - cell "+" [ref=e412] [cursor=pointer]
+              - cell "+" [ref=e413] [cursor=pointer]
+              - cell "+" [ref=e414] [cursor=pointer]
+              - cell "+" [ref=e415] [cursor=pointer]
+              - cell "+" [ref=e416] [cursor=pointer]
+              - cell "+" [ref=e417] [cursor=pointer]
+              - cell "+" [ref=e418] [cursor=pointer]
+              - cell "+" [ref=e419] [cursor=pointer]
+              - cell "+" [ref=e420] [cursor=pointer]
+              - cell "+" [ref=e421] [cursor=pointer]
+            - row "Rescates 760.950.462 260.586.228 398.618.319 101.745.915 + + + + + + + + + + + + + + + + + +" [ref=e422]:
+              - cell "Rescates" [ref=e423]:
+                - generic [ref=e424]: Rescates
+              - cell "760.950.462" [ref=e425] [cursor=pointer]
+              - cell "260.586.228" [ref=e426] [cursor=pointer]
+              - cell "398.618.319" [ref=e427] [cursor=pointer]
+              - cell "101.745.915" [ref=e428] [cursor=pointer]
+              - cell "+" [ref=e429] [cursor=pointer]
+              - cell "+" [ref=e430] [cursor=pointer]
+              - cell "+" [ref=e431] [cursor=pointer]
+              - cell "+" [ref=e432] [cursor=pointer]
+              - cell "+" [ref=e433] [cursor=pointer]
+              - cell "+" [ref=e434] [cursor=pointer]
+              - cell "+" [ref=e435] [cursor=pointer]
+              - cell "+" [ref=e436] [cursor=pointer]
+              - cell "+" [ref=e437] [cursor=pointer]
+              - cell "+" [ref=e438] [cursor=pointer]
+              - cell "+" [ref=e439] [cursor=pointer]
+              - cell "+" [ref=e440] [cursor=pointer]
+              - cell "+" [ref=e441] [cursor=pointer]
+              - cell "+" [ref=e442] [cursor=pointer]
+              - cell "+" [ref=e443] [cursor=pointer]
+              - cell "+" [ref=e444] [cursor=pointer]
+              - cell "+" [ref=e445] [cursor=pointer]
+              - cell "+" [ref=e446] [cursor=pointer]
+            - row "Saldo Final Inversiones -586.228 50.895.453 -586.239 -586.239 -586.239 -586.239 -586.239 -586.239 -586.239 -586.239 -586.239 -586.239 -586.239 -586.239 -586.239 -586.239 -586.239 -586.239 -586.239 -586.239 -586.239" [ref=e447]:
+              - cell "Saldo Final Inversiones" [ref=e448]:
+                - strong [ref=e449]: Saldo Final Inversiones
+              - cell [ref=e450]
+              - cell "-586.228" [ref=e451]
+              - cell "50.895.453" [ref=e452]
+              - cell "-586.239" [ref=e453]
+              - cell "-586.239" [ref=e454]
+              - cell "-586.239" [ref=e455]
+              - cell "-586.239" [ref=e456]
+              - cell "-586.239" [ref=e457]
+              - cell "-586.239" [ref=e458]
+              - cell "-586.239" [ref=e459]
+              - cell "-586.239" [ref=e460]
+              - cell "-586.239" [ref=e461]
+              - cell "-586.239" [ref=e462]
+              - cell "-586.239" [ref=e463]
+              - cell "-586.239" [ref=e464]
+              - cell "-586.239" [ref=e465]
+              - cell "-586.239" [ref=e466]
+              - cell "-586.239" [ref=e467]
+              - cell "-586.239" [ref=e468]
+              - cell "-586.239" [ref=e469]
+              - cell "-586.239" [ref=e470]
+              - cell "-586.239" [ref=e471]
+  - button "Open Next.js Dev Tools" [ref=e32] [cursor=pointer]:
+    - img [ref=e33]
+  - alert [ref=e36]

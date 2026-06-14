@@ -45,6 +45,13 @@ export function FciTab({ state, months }: { state: CashflowState; months: string
         {FIELDS.map((f) => (
           <tr key={f.id} className="mrow">
             <td className="c-rowhead sticky-col"><span className={"mrow-name " + f.cls}>{f.label}</span></td>
+            <td className="c-cell c-total">
+              <Money
+                v={months.reduce((a, mk) => a + (state.fci.data[mk] ?? { suscripciones: 0, rescates: 0 })[f.id], 0)}
+                decimals={false}
+                bold
+              />
+            </td>
             {months.map((mk) => {
               const v = (state.fci.data[mk] ?? { suscripciones: 0, rescates: 0 })[f.id];
               return (
@@ -53,21 +60,14 @@ export function FciTab({ state, months }: { state: CashflowState; months: string
                 </td>
               );
             })}
-            <td className="c-cell c-total">
-              <Money
-                v={months.reduce((a, mk) => a + (state.fci.data[mk] ?? { suscripciones: 0, rescates: 0 })[f.id], 0)}
-                decimals={false}
-                bold
-              />
-            </td>
           </tr>
         ))}
         <tr className="mrow mrow--total">
           <td className="c-rowhead sticky-col"><strong>Saldo Final Inversiones</strong></td>
-          {months.map((mk, idx) => (
-            <td key={mk} className="c-cell c-total"><Money v={saldoFinal(idx)} decimals={false} bold /></td>
-          ))}
           <td className="c-cell c-total"></td>
+          {months.map((mk, idx) => (
+            <td key={mk} className="c-cell"><Money v={saldoFinal(idx)} decimals={false} bold /></td>
+          ))}
         </tr>
         {edit && (
           <CellMoneyEditor

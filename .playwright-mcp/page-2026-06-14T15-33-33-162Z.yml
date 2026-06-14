@@ -1,0 +1,29 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: $
+        - generic [ref=e6]:
+          - strong [ref=e7]: CASHFLOW
+          - generic [ref=e8]: Galicia · Nación
+        - button "Replegar menú" [ref=e9] [cursor=pointer]: «
+      - navigation [ref=e10]:
+        - button "↹ Movimientos" [ref=e11] [cursor=pointer]:
+          - generic [ref=e12]: ↹
+          - generic [ref=e13]: Movimientos
+        - button "◳ Proyección" [ref=e14] [cursor=pointer]:
+          - generic [ref=e15]: ◳
+          - generic [ref=e16]: Proyección
+        - button "▦ Cashflow" [ref=e17] [cursor=pointer]:
+          - generic [ref=e18]: ▦
+          - generic [ref=e19]: Cashflow
+        - button "⚙ Ajustes" [ref=e20] [cursor=pointer]:
+          - generic [ref=e21]: ⚙
+          - generic [ref=e22]: Ajustes
+      - generic [ref=e23]:
+        - generic [ref=e24]: Cierre Banco + FCI
+        - generic [ref=e25]: "-"
+    - main [ref=e26]
+  - button "Open Next.js Dev Tools" [ref=e32] [cursor=pointer]:
+    - img [ref=e33]
+  - alert [ref=e36]

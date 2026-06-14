@@ -1,0 +1,307 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: $
+        - generic [ref=e6]:
+          - strong [ref=e7]: CASHFLOW
+          - generic [ref=e8]: Galicia · Nación
+        - button "Replegar menú" [ref=e9] [cursor=pointer]: «
+      - navigation [ref=e10]:
+        - button "↹ Movimientos" [active] [ref=e11] [cursor=pointer]:
+          - generic [ref=e12]: ↹
+          - generic [ref=e13]: Movimientos
+        - button "◳ Proyección" [ref=e14] [cursor=pointer]:
+          - generic [ref=e15]: ◳
+          - generic [ref=e16]: Proyección
+        - button "▦ Cashflow" [ref=e17] [cursor=pointer]:
+          - generic [ref=e18]: ▦
+          - generic [ref=e19]: Cashflow
+        - button "⚙ Ajustes" [ref=e20] [cursor=pointer]:
+          - generic [ref=e21]: ⚙
+          - generic [ref=e22]: Ajustes
+      - generic [ref=e23]:
+        - generic [ref=e24]: Cierre Banco + FCI
+        - generic [ref=e25]: 275.831.578
+    - main [ref=e26]:
+      - generic [ref=e5272]:
+        - generic [ref=e5273]:
+          - generic [ref=e5274]:
+            - heading "Movimientos" [level=1] [ref=e5275]
+            - paragraph [ref=e5276]: Carga diaria por banco · se resumen automáticamente en el Cashflow por fecha de pago.
+          - button "+ Nuevo movimiento" [ref=e5277] [cursor=pointer]
+        - generic [ref=e5278]:
+          - button "Banco Galicia 16" [ref=e5279] [cursor=pointer]:
+            - text: Banco Galicia
+            - generic [ref=e5281]: "16"
+          - button "Banco Nación 9" [ref=e5282] [cursor=pointer]:
+            - text: Banco Nación
+            - generic [ref=e5284]: "9"
+        - generic [ref=e5285]:
+          - generic [ref=e5286]:
+            - generic [ref=e5287]:
+              - generic [ref=e5288]: Saldo Inicial
+              - generic [ref=e5289]: 50.000.000,00
+            - generic [ref=e5290]:
+              - generic [ref=e5291]: Ingresos
+              - generic [ref=e5292]: 98.000.000,00
+            - generic [ref=e5293]:
+              - generic [ref=e5294]: Venta de USD
+              - generic [ref=e5295]: "-"
+            - generic [ref=e5296]:
+              - generic [ref=e5297]: Pagos
+              - generic [ref=e5298]: 78.231.622,76
+            - generic [ref=e5299]:
+              - generic [ref=e5300]: Transf entre cuentas
+              - generic [ref=e5301]: 115.000.000,00
+            - generic [ref=e5302]:
+              - generic [ref=e5303]: Saldo final
+              - generic [ref=e5304]: 184.768.377,24
+          - generic [ref=e5305]: ✓ Control OK
+        - table [ref=e5307]:
+          - rowgroup [ref=e5308]:
+            - row "Descripción Proveedor / Cliente F. emisión F. pago Cheque Agrupación Crédito Débito Saldo" [ref=e5309]:
+              - columnheader "Descripción" [ref=e5310]
+              - columnheader "Proveedor / Cliente" [ref=e5311]
+              - columnheader "F. emisión" [ref=e5312]
+              - columnheader "F. pago" [ref=e5313]
+              - columnheader "Cheque" [ref=e5314]
+              - columnheader "Agrupación" [ref=e5315]
+              - columnheader "Crédito" [ref=e5316]
+              - columnheader "Débito" [ref=e5317]
+              - columnheader "Saldo" [ref=e5318]
+              - columnheader [ref=e5319]
+          - rowgroup [ref=e5320]:
+            - row "Saldo Inicial 50.000.000,00" [ref=e5321]:
+              - cell "Saldo Inicial" [ref=e5322]:
+                - strong [ref=e5323]: Saldo Inicial
+              - cell [ref=e5324]
+              - cell "50.000.000,00" [ref=e5325]
+              - cell [ref=e5326]
+            - row "GASMAX 01/06/2026 239 Pagos 1.795.836,02 48.204.163,98 ✎ 🗑" [ref=e5327]:
+              - cell "GASMAX" [ref=e5328]
+              - cell [ref=e5329]
+              - cell [ref=e5330]
+              - cell "01/06/2026" [ref=e5331]
+              - cell "239" [ref=e5332]
+              - cell "Pagos" [ref=e5333]:
+                - generic [ref=e5334]: Pagos
+              - cell [ref=e5335]
+              - cell "1.795.836,02" [ref=e5336]
+              - cell "48.204.163,98" [ref=e5337]
+              - cell "✎ 🗑" [ref=e5338]:
+                - button "✎" [ref=e5339] [cursor=pointer]
+                - button "🗑" [ref=e5340] [cursor=pointer]
+            - row "ECHEQ EN CARTERA 02/06/2026 Ingresos 60.000.000,00 108.204.163,98 ✎ 🗑" [ref=e5341]:
+              - cell "ECHEQ EN CARTERA" [ref=e5342]
+              - cell [ref=e5343]
+              - cell [ref=e5344]
+              - cell "02/06/2026" [ref=e5345]
+              - cell [ref=e5346]
+              - cell "Ingresos" [ref=e5347]:
+                - generic [ref=e5348]: Ingresos
+              - cell "60.000.000,00" [ref=e5349]
+              - cell [ref=e5350]
+              - cell "108.204.163,98" [ref=e5351]
+              - cell "✎ 🗑" [ref=e5352]:
+                - button "✎" [ref=e5353] [cursor=pointer]
+                - button "🗑" [ref=e5354] [cursor=pointer]
+            - row "TRANSFERENCIA GALICIA 05/06/2026 Transf entre cuentas 115.000.000,00 223.204.163,98 ✎ 🗑" [ref=e5355]:
+              - cell "TRANSFERENCIA" [ref=e5356]
+              - cell "GALICIA" [ref=e5357]
+              - cell [ref=e5358]
+              - cell "05/06/2026" [ref=e5359]
+              - cell [ref=e5360]
+              - cell "Transf entre cuentas" [ref=e5361]:
+                - generic [ref=e5362]: Transf entre cuentas
+              - cell "115.000.000,00" [ref=e5363]
+              - cell [ref=e5364]
+              - cell "223.204.163,98" [ref=e5365]
+              - cell "✎ 🗑" [ref=e5366]:
+                - button "✎" [ref=e5367] [cursor=pointer]
+                - button "🗑" [ref=e5368] [cursor=pointer]
+            - row "ESTACION EL BAJO 15/06/2026 258 Pagos 21.738.124,70 201.466.039,28 ✎ 🗑" [ref=e5369]:
+              - cell "ESTACION EL BAJO" [ref=e5370]
+              - cell [ref=e5371]
+              - cell [ref=e5372]
+              - cell "15/06/2026" [ref=e5373]
+              - cell "258" [ref=e5374]
+              - cell "Pagos" [ref=e5375]:
+                - generic [ref=e5376]: Pagos
+              - cell [ref=e5377]
+              - cell "21.738.124,70" [ref=e5378]
+              - cell "201.466.039,28" [ref=e5379]
+              - cell "✎ 🗑" [ref=e5380]:
+                - button "✎" [ref=e5381] [cursor=pointer]
+                - button "🗑" [ref=e5382] [cursor=pointer]
+            - row "ESTACION EL BAJO 16/06/2026 268 Pagos 11.000.000,00 190.466.039,28 ✎ 🗑" [ref=e5383]:
+              - cell "ESTACION EL BAJO" [ref=e5384]
+              - cell [ref=e5385]
+              - cell [ref=e5386]
+              - cell "16/06/2026" [ref=e5387]
+              - cell "268" [ref=e5388]
+              - cell "Pagos" [ref=e5389]:
+                - generic [ref=e5390]: Pagos
+              - cell [ref=e5391]
+              - cell "11.000.000,00" [ref=e5392]
+              - cell "190.466.039,28" [ref=e5393]
+              - cell "✎ 🗑" [ref=e5394]:
+                - button "✎" [ref=e5395] [cursor=pointer]
+                - button "🗑" [ref=e5396] [cursor=pointer]
+            - row "ESTACION EL BAJO 19/06/2026 269 Pagos 11.000.000,00 179.466.039,28 ✎ 🗑" [ref=e5397]:
+              - cell "ESTACION EL BAJO" [ref=e5398]
+              - cell [ref=e5399]
+              - cell [ref=e5400]
+              - cell "19/06/2026" [ref=e5401]
+              - cell "269" [ref=e5402]
+              - cell "Pagos" [ref=e5403]:
+                - generic [ref=e5404]: Pagos
+              - cell [ref=e5405]
+              - cell "11.000.000,00" [ref=e5406]
+              - cell "179.466.039,28" [ref=e5407]
+              - cell "✎ 🗑" [ref=e5408]:
+                - button "✎" [ref=e5409] [cursor=pointer]
+                - button "🗑" [ref=e5410] [cursor=pointer]
+            - row "LUIS S FERRO 19/06/2026 259 Pagos 3.000.000,00 176.466.039,28 ✎ 🗑" [ref=e5411]:
+              - cell "LUIS S FERRO" [ref=e5412]
+              - cell [ref=e5413]
+              - cell [ref=e5414]
+              - cell "19/06/2026" [ref=e5415]
+              - cell "259" [ref=e5416]
+              - cell "Pagos" [ref=e5417]:
+                - generic [ref=e5418]: Pagos
+              - cell [ref=e5419]
+              - cell "3.000.000,00" [ref=e5420]
+              - cell "176.466.039,28" [ref=e5421]
+              - cell "✎ 🗑" [ref=e5422]:
+                - button "✎" [ref=e5423] [cursor=pointer]
+                - button "🗑" [ref=e5424] [cursor=pointer]
+            - row "PETROBAN SRL 22/06/2026 266 Pagos 11.477.394,79 164.988.644,49 ✎ 🗑" [ref=e5425]:
+              - cell "PETROBAN SRL" [ref=e5426]
+              - cell [ref=e5427]
+              - cell [ref=e5428]
+              - cell "22/06/2026" [ref=e5429]
+              - cell "266" [ref=e5430]
+              - cell "Pagos" [ref=e5431]:
+                - generic [ref=e5432]: Pagos
+              - cell [ref=e5433]
+              - cell "11.477.394,79" [ref=e5434]
+              - cell "164.988.644,49" [ref=e5435]
+              - cell "✎ 🗑" [ref=e5436]:
+                - button "✎" [ref=e5437] [cursor=pointer]
+                - button "🗑" [ref=e5438] [cursor=pointer]
+            - row "ESTACION EL BAJO 22/06/2026 270 Pagos 11.200.000,00 153.788.644,49 ✎ 🗑" [ref=e5439]:
+              - cell "ESTACION EL BAJO" [ref=e5440]
+              - cell [ref=e5441]
+              - cell [ref=e5442]
+              - cell "22/06/2026" [ref=e5443]
+              - cell "270" [ref=e5444]
+              - cell "Pagos" [ref=e5445]:
+                - generic [ref=e5446]: Pagos
+              - cell [ref=e5447]
+              - cell "11.200.000,00" [ref=e5448]
+              - cell "153.788.644,49" [ref=e5449]
+              - cell "✎ 🗑" [ref=e5450]:
+                - button "✎" [ref=e5451] [cursor=pointer]
+                - button "🗑" [ref=e5452] [cursor=pointer]
+            - row "AGRICOLA GARCIA 26/06/2026 260 Pagos 4.000.000,00 149.788.644,49 ✎ 🗑" [ref=e5453]:
+              - cell "AGRICOLA GARCIA" [ref=e5454]
+              - cell [ref=e5455]
+              - cell [ref=e5456]
+              - cell "26/06/2026" [ref=e5457]
+              - cell "260" [ref=e5458]
+              - cell "Pagos" [ref=e5459]:
+                - generic [ref=e5460]: Pagos
+              - cell [ref=e5461]
+              - cell "4.000.000,00" [ref=e5462]
+              - cell "149.788.644,49" [ref=e5463]
+              - cell "✎ 🗑" [ref=e5464]:
+                - button "✎" [ref=e5465] [cursor=pointer]
+                - button "🗑" [ref=e5466] [cursor=pointer]
+            - row "NEUMATICOS EL TIMBO SAS 29/06/2026 262 Pagos 590.000,00 149.198.644,49 ✎ 🗑" [ref=e5467]:
+              - cell "NEUMATICOS EL TIMBO SAS" [ref=e5468]
+              - cell [ref=e5469]
+              - cell [ref=e5470]
+              - cell "29/06/2026" [ref=e5471]
+              - cell "262" [ref=e5472]
+              - cell "Pagos" [ref=e5473]:
+                - generic [ref=e5474]: Pagos
+              - cell [ref=e5475]
+              - cell "590.000,00" [ref=e5476]
+              - cell "149.198.644,49" [ref=e5477]
+              - cell "✎ 🗑" [ref=e5478]:
+                - button "✎" [ref=e5479] [cursor=pointer]
+                - button "🗑" [ref=e5480] [cursor=pointer]
+            - row "NOR TEX SAS 30/06/2026 257 Pagos 2.430.267,25 146.768.377,24 ✎ 🗑" [ref=e5481]:
+              - cell "NOR TEX SAS" [ref=e5482]
+              - cell [ref=e5483]
+              - cell [ref=e5484]
+              - cell "30/06/2026" [ref=e5485]
+              - cell "257" [ref=e5486]
+              - cell "Pagos" [ref=e5487]:
+                - generic [ref=e5488]: Pagos
+              - cell [ref=e5489]
+              - cell "2.430.267,25" [ref=e5490]
+              - cell "146.768.377,24" [ref=e5491]
+              - cell "✎ 🗑" [ref=e5492]:
+                - button "✎" [ref=e5493] [cursor=pointer]
+                - button "🗑" [ref=e5494] [cursor=pointer]
+            - row "PENDIENTE DE COBRO AGD 30/06/2026 Ingresos 14.000.000,00 160.768.377,24 ✎ 🗑" [ref=e5495]:
+              - cell "PENDIENTE DE COBRO" [ref=e5496]
+              - cell "AGD" [ref=e5497]
+              - cell [ref=e5498]
+              - cell "30/06/2026" [ref=e5499]
+              - cell [ref=e5500]
+              - cell "Ingresos" [ref=e5501]:
+                - generic [ref=e5502]: Ingresos
+              - cell "14.000.000,00" [ref=e5503]
+              - cell [ref=e5504]
+              - cell "160.768.377,24" [ref=e5505]
+              - cell "✎ 🗑" [ref=e5506]:
+                - button "✎" [ref=e5507] [cursor=pointer]
+                - button "🗑" [ref=e5508] [cursor=pointer]
+            - row "PENDIENTE DE COBRO RUIZ RODRIGO 30/06/2026 Ingresos 12.000.000,00 172.768.377,24 ✎ 🗑" [ref=e5509]:
+              - cell "PENDIENTE DE COBRO" [ref=e5510]
+              - cell "RUIZ RODRIGO" [ref=e5511]
+              - cell [ref=e5512]
+              - cell "30/06/2026" [ref=e5513]
+              - cell [ref=e5514]
+              - cell "Ingresos" [ref=e5515]:
+                - generic [ref=e5516]: Ingresos
+              - cell "12.000.000,00" [ref=e5517]
+              - cell [ref=e5518]
+              - cell "172.768.377,24" [ref=e5519]
+              - cell "✎ 🗑" [ref=e5520]:
+                - button "✎" [ref=e5521] [cursor=pointer]
+                - button "🗑" [ref=e5522] [cursor=pointer]
+            - row "PENDIENTE DE COBRO ESTANCIA EL AZUL 30/06/2026 Ingresos 8.000.000,00 180.768.377,24 ✎ 🗑" [ref=e5523]:
+              - cell "PENDIENTE DE COBRO" [ref=e5524]
+              - cell "ESTANCIA EL AZUL" [ref=e5525]
+              - cell [ref=e5526]
+              - cell "30/06/2026" [ref=e5527]
+              - cell [ref=e5528]
+              - cell "Ingresos" [ref=e5529]:
+                - generic [ref=e5530]: Ingresos
+              - cell "8.000.000,00" [ref=e5531]
+              - cell [ref=e5532]
+              - cell "180.768.377,24" [ref=e5533]
+              - cell "✎ 🗑" [ref=e5534]:
+                - button "✎" [ref=e5535] [cursor=pointer]
+                - button "🗑" [ref=e5536] [cursor=pointer]
+            - row "PENDIENTE DE COBRO SOUTH FOUTH 30/06/2026 Ingresos 4.000.000,00 184.768.377,24 ✎ 🗑" [ref=e5537]:
+              - cell "PENDIENTE DE COBRO" [ref=e5538]
+              - cell "SOUTH FOUTH" [ref=e5539]
+              - cell [ref=e5540]
+              - cell "30/06/2026" [ref=e5541]
+              - cell [ref=e5542]
+              - cell "Ingresos" [ref=e5543]:
+                - generic [ref=e5544]: Ingresos
+              - cell "4.000.000,00" [ref=e5545]
+              - cell [ref=e5546]
+              - cell "184.768.377,24" [ref=e5547]
+              - cell "✎ 🗑" [ref=e5548]:
+                - button "✎" [ref=e5549] [cursor=pointer]
+                - button "🗑" [ref=e5550] [cursor=pointer]
+  - button "Open Next.js Dev Tools" [ref=e32] [cursor=pointer]:
+    - img [ref=e33]
+  - alert [ref=e315]
