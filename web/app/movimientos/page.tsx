@@ -42,6 +42,9 @@ export default function MovimientosPage() {
   const [bankId, setBankId] = useState<BankId>("galicia");
   const [editing, setEditing] = useState<Movement | "new" | null>(null);
   const [confirm, setConfirm] = useState<Movement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importErrors, setImportErrors] = useState<ImportRowError[] | null>(null);
+  const [importReview, setImportReview] = useState<{ rows: ParsedRow[]; duplicateIds: (string | null)[] } | null>(null);
 
   // Filtros
   const [searchCol, setSearchCol] = useState<SearchCol>("todas");
@@ -161,10 +164,6 @@ export default function MovimientosPage() {
     const suffix = selMonth === "todos" ? "todos" : selMonth;
     downloadXlsx(`Movimientos_${b.short}_${suffix}`, [{ name: `${b.short} ${suffix}`, aoa }]);
   };
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [importErrors, setImportErrors] = useState<ImportRowError[] | null>(null);
-  const [importReview, setImportReview] = useState<{ rows: ParsedRow[]; duplicateIds: (string | null)[] } | null>(null);
 
   const onImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
