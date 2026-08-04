@@ -5,6 +5,7 @@ import { Sidebar } from "./Sidebar";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -27,8 +28,20 @@ export function AppShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className={"app" + (collapsed ? " collapsed" : "")}>
-      <Sidebar collapsed={collapsed} onToggleCollapsed={toggleCollapsed} />
+    <div className={"app" + (collapsed ? " collapsed" : "") + (mobileOpen ? " mobile-open" : "")}>
+      {/* Solo visible en mobile (oculto en desktop vía CSS). */}
+      <div className="mobile-topbar">
+        <button className="mobile-burger" onClick={() => setMobileOpen(true)} aria-label="Abrir menú">
+          ☰
+        </button>
+        <div className="mobile-brand">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="mobile-brand-logo" src="/logo.jpeg" alt="Grupo Don Félix" />
+          <strong>CASHFLOW</strong>
+        </div>
+      </div>
+      <div className="mobile-backdrop" onClick={() => setMobileOpen(false)} />
+      <Sidebar collapsed={collapsed} onToggleCollapsed={toggleCollapsed} onNavigate={() => setMobileOpen(false)} />
       <main className="main">{children}</main>
     </div>
   );

@@ -8,6 +8,7 @@ import { useCashflow } from "@/context/CashflowContext";
 const NAV = [
   { href: "/movimientos", label: "Movimientos", icon: "↹" },
   { href: "/proyeccion", label: "Proyección", icon: "◳" },
+  { href: "/cheques", label: "Cheques", icon: "▤" },
   { href: "/cashflow", label: "Cashflow", icon: "▦" },
   { href: "/ajustes", label: "Ajustes", icon: "⚙" },
 ];
@@ -15,9 +16,11 @@ const NAV = [
 export function Sidebar({
   collapsed,
   onToggleCollapsed,
+  onNavigate,
 }: {
   collapsed: boolean;
   onToggleCollapsed: () => void;
+  onNavigate?: () => void;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -32,8 +35,11 @@ export function Sidebar({
 
   return (
     <aside className="sidebar">
+      <div className="brand-logo">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.jpeg" alt="Grupo Don Félix" />
+      </div>
       <div className="brand">
-        <div className="brand-mark">$</div>
         <div className="brand-txt">
           <strong>CASHFLOW</strong>
           <span>Galicia · Nación</span>
@@ -52,7 +58,10 @@ export function Sidebar({
           <button
             key={n.href}
             className={"nav-item" + (pathname === n.href ? " active" : "")}
-            onClick={() => router.push(n.href)}
+            onClick={() => {
+              router.push(n.href);
+              onNavigate?.();
+            }}
             title={n.label}
           >
             <span className="nav-ico">{n.icon}</span>

@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import type { CashflowState, Movement } from "@/lib/types";
+import type { CashflowState, Cheque, Movement } from "@/lib/types";
 import {
   fetchAllData,
   insertMovement,
@@ -13,6 +13,9 @@ import {
   upsertIvaMonthly,
   updateSettings as updateSettingsInDb,
   updateFciSaldoInicial as updateFciSaldoInicialInDb,
+  insertCheque,
+  updateCheque as updateChequeInDb,
+  deleteCheque as deleteChequeInDb,
   resetToSeed,
 } from "@/lib/data";
 
@@ -29,6 +32,9 @@ interface CashflowContextValue {
   setFciSaldoInicial: (value: number) => Promise<void>;
   setIvaCell: (rowName: string, monthKey: string, monto: number) => Promise<void>;
   setSettings: (settings: CashflowState["settings"]) => Promise<void>;
+  addCheque: (c: Omit<Cheque, "id">) => Promise<void>;
+  updateCheque: (c: Cheque) => Promise<void>;
+  deleteCheque: (id: string) => Promise<void>;
   reset: () => Promise<void>;
 }
 
@@ -114,6 +120,21 @@ export function CashflowProvider({ children }: { children: ReactNode }) {
     await updateSettingsInDb(settings);
   };
 
+  const addCheque = async (c: Omit<Cheque, "id">) => {
+    const created = await insertCheque(c);
+    setState((s) => (s ? { ...s, cheques: [...s.cheques, created] } : s));
+  };
+
+  const updateCheque = async (c: Cheque) => {
+    setState((s) => (s ? { ...s, cheques: s.cheques.map((x) => (x.id === c.id ? c : x)) } : s));
+    await updateChequeInDb(c);
+  };
+
+  const deleteCheque = async (id: string) => {
+    setState((s) => (s ? { ...s, cheques: s.cheques.filter((x) => x.id !== id) } : s));
+    await deleteChequeInDb(id);
+  };
+
   const reset = async () => {
     await resetToSeed();
     const fresh = await fetchAllData();
@@ -133,6 +154,9 @@ export function CashflowProvider({ children }: { children: ReactNode }) {
     setFciSaldoInicial,
     setIvaCell,
     setSettings,
+    addCheque,
+    updateCheque,
+    deleteCheque,
     reset,
   };
 

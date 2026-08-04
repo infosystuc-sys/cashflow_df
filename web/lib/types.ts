@@ -38,12 +38,31 @@ export interface Settings {
   rangeEnd: string; // 'YYYY-MM'
 }
 
+export type ChequeEstado = "en_cartera" | "depositado" | "acreditado" | "endosado";
+
+export interface Cheque {
+  id: string;
+  cliente: string;
+  numero: string;
+  bancoEmisor: string;
+  bancoDestino: BankId | "";
+  importe: number;
+  fechaRecepcion: string; // 'YYYY-MM-DD'
+  fechaPago: string; // 'YYYY-MM-DD'
+  estado: ChequeEstado;
+  fechaDeposito: string; // 'YYYY-MM-DD' o ''
+  fechaAcreditacion: string; // 'YYYY-MM-DD' o ''
+  fechaRechazo: string; // 'YYYY-MM-DD' o ''
+  fechaEndoso: string; // 'YYYY-MM-DD' o ''
+}
+
 export interface CashflowState {
   settings: Settings;
   movements: Movement[];
   projection: ProjectionMap;
   fci: { saldoInicial: number; data: FciData };
   iva: IvaData;
+  cheques: Cheque[];
 }
 
 export interface BankRow extends Movement {
@@ -78,6 +97,12 @@ export interface CashflowRow {
   proyTotal: number;
   realIngresos: number;
   vsPresup: number;
+  chequesSaldoInicial: number;
+  chequesRecibidos: number;
+  chequesSalida: number;
+  chequesRechazados: number;
+  chequesSaldoFinal: number;
+  chequesAcreditado: number;
 }
 
 export interface CashflowResult {

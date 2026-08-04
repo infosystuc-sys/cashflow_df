@@ -1,26 +1,54 @@
 import { supabase } from "./supabase";
-import { seedFci, seedIva, seedMovements, seedProjection, seedSettings } from "./seed";
+import { seedCheques, seedFci, seedIva, seedMovements, seedProjection, seedSettings } from "./seed";
 import { IVA_ROWS, PROJ_CONCEPTS } from "./constants";
-import type { CashflowState, Movement } from "./types";
+import type { BankId, CashflowState, Cheque, Movement } from "./types";
+
+type MovementRow = {
+  id: string;
+  bank: BankId;
+  descripcion: string;
+  proveedor: string;
+  fecha_emision: string | null;
+  fecha_pago: string;
+  cheque: string;
+  credito: number | string;
+  debito: number | string;
+  grupo: string;
+};
+
+// Supabase/PostgREST devuelve como máximo 1000 filas por request. Para tablas que
+// pueden superar ese límite (movements) hay que paginar con .range() hasta agotar.
+async function fetchAllRows<T>(table: string): Promise<T[]> {
+  const pageSize = 1000;
+  const all: T[] = [];
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await supabase.from(table).select("*").range(from, from + pageSize - 1);
+    if (error) throw error;
+    all.push(...((data ?? []) as T[]));
+    if (!data || data.length < pageSize) break;
+  }
+  return all;
+}
 
 export async function fetchAllData(): Promise<CashflowState> {
-  const [settingsRes, movementsRes, projectionRes, fciRes, ivaRes] = await Promise.all([
+  const [settingsRes, movementsRows, projectionRes, fciRes, ivaRes, chequesRes] = await Promise.all([
     supabase.from("settings").select("*").eq("id", 1).single(),
-    supabase.from("movements").select("*"),
+    fetchAllRows<MovementRow>("movements"),
     supabase.from("projection_cells").select("*"),
     supabase.from("fci_monthly").select("*"),
     supabase.from("iva_monthly").select("*"),
+    supabase.from("cheques").select("*"),
   ]);
 
   if (settingsRes.error) throw settingsRes.error;
-  if (movementsRes.error) throw movementsRes.error;
   if (projectionRes.error) throw projectionRes.error;
   if (fciRes.error) throw fciRes.error;
   if (ivaRes.error) throw ivaRes.error;
+  if (chequesRes.error) throw chequesRes.error;
 
   const s = settingsRes.data;
 
-  const movements: Movement[] = movementsRes.data.map((row) => ({
+  const movements: Movement[] = movementsRows.map((row) => ({
     id: row.id,
     bank: row.bank,
     descripcion: row.descripcion,
@@ -50,6 +78,22 @@ export async function fetchAllData(): Promise<CashflowState> {
     iva[row.row_name][row.month_key] = Number(row.monto);
   });
 
+  const cheques: Cheque[] = chequesRes.data.map((row) => ({
+    id: row.id,
+    cliente: row.cliente,
+    numero: row.numero,
+    bancoEmisor: row.banco_emisor,
+    bancoDestino: row.banco_destino,
+    importe: Number(row.importe),
+    fechaRecepcion: row.fecha_recepcion,
+    fechaPago: row.fecha_pago ?? "",
+    estado: row.estado,
+    fechaDeposito: row.fecha_deposito ?? "",
+    fechaAcreditacion: row.fecha_acreditacion ?? "",
+    fechaRechazo: row.fecha_rechazo ?? "",
+    fechaEndoso: row.fecha_endoso ?? "",
+  }));
+
   return {
     settings: {
       saldoInicial: { galicia: Number(s.saldo_inicial_galicia), nacion: Number(s.saldo_inicial_nacion) },
@@ -60,6 +104,7 @@ export async function fetchAllData(): Promise<CashflowState> {
     projection,
     fci: { saldoInicial: Number(s.fci_saldo_inicial), data: fciData },
     iva,
+    cheques,
   };
 }
 
@@ -181,11 +226,59 @@ export async function updateFciSaldoInicial(value: number): Promise<void> {
   if (error) throw error;
 }
 
+function chequeToRow(c: Omit<Cheque, "id">) {
+  return {
+    cliente: c.cliente,
+    numero: c.numero,
+    banco_emisor: c.bancoEmisor,
+    banco_destino: c.bancoDestino,
+    importe: c.importe,
+    fecha_recepcion: c.fechaRecepcion,
+    fecha_pago: c.fechaPago || null,
+    estado: c.estado,
+    fecha_deposito: c.fechaDeposito || null,
+    fecha_acreditacion: c.fechaAcreditacion || null,
+    fecha_rechazo: c.fechaRechazo || null,
+    fecha_endoso: c.fechaEndoso || null,
+  };
+}
+
+export async function insertCheque(c: Omit<Cheque, "id">): Promise<Cheque> {
+  const { data, error } = await supabase.from("cheques").insert(chequeToRow(c)).select().single();
+  if (error) throw error;
+  return {
+    id: data.id,
+    cliente: data.cliente,
+    numero: data.numero,
+    bancoEmisor: data.banco_emisor,
+    bancoDestino: data.banco_destino,
+    importe: Number(data.importe),
+    fechaRecepcion: data.fecha_recepcion,
+    fechaPago: data.fecha_pago ?? "",
+    estado: data.estado,
+    fechaDeposito: data.fecha_deposito ?? "",
+    fechaAcreditacion: data.fecha_acreditacion ?? "",
+    fechaRechazo: data.fecha_rechazo ?? "",
+    fechaEndoso: data.fecha_endoso ?? "",
+  };
+}
+
+export async function updateCheque(c: Cheque): Promise<void> {
+  const { error } = await supabase.from("cheques").update(chequeToRow(c)).eq("id", c.id);
+  if (error) throw error;
+}
+
+export async function deleteCheque(id: string): Promise<void> {
+  const { error } = await supabase.from("cheques").delete().eq("id", id);
+  if (error) throw error;
+}
+
 export async function resetToSeed(): Promise<void> {
   await supabase.from("movements").delete().not("id", "is", null);
   await supabase.from("projection_cells").delete().not("concept_id", "is", null);
   await supabase.from("fci_monthly").delete().not("month_key", "is", null);
   await supabase.from("iva_monthly").delete().not("row_name", "is", null);
+  await supabase.from("cheques").delete().not("id", "is", null);
 
   const settings = seedSettings();
   const fci = seedFci();
@@ -237,4 +330,7 @@ export async function resetToSeed(): Promise<void> {
     });
   });
   if (ivaRows.length) await supabase.from("iva_monthly").insert(ivaRows);
+
+  const cheques = seedCheques().map(chequeToRow);
+  if (cheques.length) await supabase.from("cheques").insert(cheques);
 }

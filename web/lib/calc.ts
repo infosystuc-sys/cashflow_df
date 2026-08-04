@@ -77,17 +77,72 @@ export function fciMonth(state: CashflowState, monthKey: string) {
   return { suscripciones: Number(d.suscripciones) || 0, rescates: Number(d.rescates) || 0 };
 }
 
+// Eventos de cartera de cada cheque, derivados de su estado actual y sus fechas
+// (ver simplificación aceptada en el spec: solo se conserva el intento más reciente).
+type ChequeEvento = { fecha: string; tipo: "recibido" | "salida" | "rechazo"; importe: number };
+
+function chequeEventos(c: CashflowState["cheques"][number]): ChequeEvento[] {
+  const eventos: ChequeEvento[] = [];
+  if (c.fechaRecepcion) eventos.push({ fecha: c.fechaRecepcion, tipo: "recibido", importe: c.importe });
+  if (c.estado === "endosado" && c.fechaEndoso) {
+    eventos.push({ fecha: c.fechaEndoso, tipo: "salida", importe: c.importe });
+  } else if ((c.estado === "depositado" || c.estado === "acreditado") && c.fechaDeposito) {
+    eventos.push({ fecha: c.fechaDeposito, tipo: "salida", importe: c.importe });
+  } else if (c.estado === "en_cartera" && c.fechaRechazo) {
+    if (c.fechaDeposito) eventos.push({ fecha: c.fechaDeposito, tipo: "salida", importe: c.importe });
+    eventos.push({ fecha: c.fechaRechazo, tipo: "rechazo", importe: c.importe });
+  }
+  return eventos;
+}
+
+// Saldo de cartera de cheques inmediatamente antes de monthKey, reproduciendo
+// cronológicamente todos los eventos anteriores (sin necesitar un saldo inicial manual).
+export function chequesCarteraAntes(state: CashflowState, monthKey: string): number {
+  return state.cheques
+    .flatMap(chequeEventos)
+    .filter((e) => (monthKeyFromISO(e.fecha) || "") < monthKey)
+    .reduce((a, e) => a + (e.tipo === "salida" ? -e.importe : e.importe), 0);
+}
+
+export function chequesResumen(state: CashflowState, hoy = new Date().toISOString().slice(0, 10)) {
+  const enCartera = state.cheques.filter((c) => c.estado === "en_cartera");
+  const depositado = state.cheques.filter((c) => c.estado === "depositado");
+  const mesActual = monthKeyFromISO(hoy);
+  const acreditadoMes = state.cheques
+    .filter((c) => c.estado === "acreditado" && monthKeyFromISO(c.fechaAcreditacion) === mesActual)
+    .reduce((a, c) => a + c.importe, 0);
+  return {
+    totalCartera: enCartera.reduce((a, c) => a + c.importe, 0),
+    totalDepositadoPendiente: depositado.reduce((a, c) => a + c.importe, 0),
+    acreditadoMes,
+    cantidadRechazados: enCartera.filter((c) => c.fechaRechazo).length,
+  };
+}
+
+export function chequesMonth(state: CashflowState, monthKey: string) {
+  const eventosMes = state.cheques.flatMap(chequeEventos).filter((e) => monthKeyFromISO(e.fecha) === monthKey);
+  const recibidos = eventosMes.filter((e) => e.tipo === "recibido").reduce((a, e) => a + e.importe, 0);
+  const salida = eventosMes.filter((e) => e.tipo === "salida").reduce((a, e) => a + e.importe, 0);
+  const rechazados = eventosMes.filter((e) => e.tipo === "rechazo").reduce((a, e) => a + e.importe, 0);
+  const acreditado = state.cheques
+    .filter((c) => c.estado === "acreditado" && monthKeyFromISO(c.fechaAcreditacion) === monthKey)
+    .reduce((a, c) => a + c.importe, 0);
+  return { recibidos, salida, rechazados, acreditado };
+}
+
 // Construye la matriz completa del cashflow para el rango de meses configurado
 export function buildCashflow(state: CashflowState): CashflowResult {
   const months = monthRange(state.settings.rangeStart, state.settings.rangeEnd);
   const bankInicialTotal = (state.settings.saldoInicial.galicia || 0) + (state.settings.saldoInicial.nacion || 0);
   let saldoBancoPrev = bankInicialTotal;
   let saldoFciPrev = state.fci.saldoInicial || 0;
+  let saldoChequesPrev = months.length ? chequesCarteraAntes(state, months[0]) : 0;
 
   const rows = months.map((mk, idx) => {
     const r = realMonth(state, mk);
     const fci = fciMonth(state, mk);
     const invFCI = fci.suscripciones - fci.rescates; // dinero que sale del banco hacia FCI
+    const cheques = chequesMonth(state, mk);
 
     const saldoInicialBanco = idx === 0 ? bankInicialTotal : saldoBancoPrev;
     const saldoFinalBanco = saldoInicialBanco + r.ingresos + r.ventaUSD - r.pagos - invFCI + r.transf;
@@ -95,8 +150,12 @@ export function buildCashflow(state: CashflowState): CashflowResult {
     const saldoInicialFci = idx === 0 ? state.fci.saldoInicial || 0 : saldoFciPrev;
     const saldoFinalFci = saldoInicialFci + fci.suscripciones - fci.rescates;
 
+    const chequesSaldoInicial = saldoChequesPrev;
+    const chequesSaldoFinal = chequesSaldoInicial + cheques.recibidos - cheques.salida + cheques.rechazados;
+
     saldoBancoPrev = saldoFinalBanco;
     saldoFciPrev = saldoFinalFci;
+    saldoChequesPrev = chequesSaldoFinal;
 
     const proyTotal = projMonthTotal(state, mk);
 
@@ -118,6 +177,12 @@ export function buildCashflow(state: CashflowState): CashflowResult {
       proyTotal,
       realIngresos: r.ingresos + r.ventaUSD,
       vsPresup: r.ingresos + r.ventaUSD - proyTotal,
+      chequesSaldoInicial,
+      chequesRecibidos: cheques.recibidos,
+      chequesSalida: cheques.salida,
+      chequesRechazados: cheques.rechazados,
+      chequesSaldoFinal,
+      chequesAcreditado: cheques.acreditado,
     };
   });
 

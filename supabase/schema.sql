@@ -46,8 +46,25 @@ create table iva_monthly (
   primary key (row_name, month_key)
 );
 
+create table cheques (
+  id uuid primary key default gen_random_uuid(),
+  cliente text not null default '',
+  numero text not null default '',
+  banco_emisor text not null default '',
+  banco_destino text not null default '' check (banco_destino in ('', 'galicia', 'nacion')),
+  importe numeric not null default 0,
+  fecha_recepcion date not null,
+  fecha_pago date,
+  estado text not null default 'en_cartera' check (estado in ('en_cartera', 'depositado', 'acreditado', 'endosado')),
+  fecha_deposito date,
+  fecha_acreditacion date,
+  fecha_rechazo date,
+  fecha_endoso date,
+  created_at timestamptz not null default now()
+);
+
 -- Grants for the anon role (no-auth app)
-grant select, insert, update, delete on settings, movements, projection_cells, fci_monthly, iva_monthly to anon;
+grant select, insert, update, delete on settings, movements, projection_cells, fci_monthly, iva_monthly, cheques to anon;
 
 -- ---------- Seed data ----------
 
@@ -111,3 +128,8 @@ insert into iva_monthly (row_name, month_key, monto) values
 ('Fletes', '2025-08', 29827779),
 ('Fletes', '2025-09', 55404284),
 ('Fletes', '2025-10', 65408269);
+
+insert into cheques (cliente, numero, banco_emisor, banco_destino, importe, fecha_recepcion, fecha_pago, estado, fecha_deposito, fecha_acreditacion) values
+('AGD', '0001234', 'Banco Santander', 'galicia', 14000000, '2026-06-20', '2026-06-30', 'en_cartera', null, null),
+('RUIZ RODRIGO', '0005678', 'Banco Macro', 'nacion', 12000000, '2026-06-22', '2026-07-05', 'depositado', '2026-06-29', null),
+('ESTANCIA EL AZUL', '0009012', 'Banco Galicia', 'galicia', 8000000, '2026-05-10', '2026-05-20', 'acreditado', '2026-05-18', '2026-05-22');

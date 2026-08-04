@@ -1,4 +1,4 @@
-import type { CashflowState, FciData, IvaData, Movement, ProjectionMap, Settings } from "./types";
+import type { Cheque, CashflowState, FciData, IvaData, Movement, ProjectionMap, Settings } from "./types";
 import { IVA_ROWS, PROJ_CONCEPTS } from "./constants";
 
 export type SeedMovement = Omit<Movement, "id">;
@@ -98,8 +98,36 @@ export function seedIva(): IvaData {
   return v;
 }
 
+export type SeedCheque = Omit<Cheque, "id">;
+
+export function seedCheques(): SeedCheque[] {
+  const c = (
+    cliente: string,
+    numero: string,
+    bancoEmisor: string,
+    bancoDestino: Cheque["bancoDestino"],
+    importe: number,
+    fechaRecepcion: string,
+    fechaPago: string,
+    estado: Cheque["estado"],
+    fechaDeposito = "",
+    fechaAcreditacion = "",
+    fechaRechazo = "",
+    fechaEndoso = ""
+  ): SeedCheque => ({
+    cliente, numero, bancoEmisor, bancoDestino, importe, fechaRecepcion, fechaPago, estado,
+    fechaDeposito, fechaAcreditacion, fechaRechazo, fechaEndoso,
+  });
+
+  return [
+    c("AGD", "0001234", "Banco Santander", "galicia", 14000000, "2026-06-20", "2026-06-30", "en_cartera"),
+    c("RUIZ RODRIGO", "0005678", "Banco Macro", "nacion", 12000000, "2026-06-22", "2026-07-05", "depositado", "2026-06-29"),
+    c("ESTANCIA EL AZUL", "0009012", "Banco Galicia", "galicia", 8000000, "2026-05-10", "2026-05-20", "acreditado", "2026-05-18", "2026-05-22"),
+  ];
+}
+
 // Full in-memory state for tests and for the "reset to demo data" flow.
-// Movements get synthetic ids here; resetToSeed() (Task 8) inserts seedMovements()
+// Movements/cheques get synthetic ids here; resetToSeed() (Task 8) inserts them
 // directly so Postgres assigns real uuids.
 export function seedState(): CashflowState {
   return {
@@ -108,5 +136,6 @@ export function seedState(): CashflowState {
     projection: seedProjection(),
     fci: seedFci(),
     iva: seedIva(),
+    cheques: seedCheques().map((c, i) => ({ ...c, id: `seed-cheque-${i}` })),
   };
 }
