@@ -29,3 +29,7 @@ export function parseNum(s: unknown): number {
   const v = parseFloat(t);
   return Number.isNaN(v) ? 0 : v;
 }
+
+export function norm(s: string): string {
+  return (s || "").toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+}

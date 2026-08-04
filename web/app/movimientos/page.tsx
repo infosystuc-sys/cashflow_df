@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useCashflow } from "@/context/CashflowContext";
 import { bankRows, bankSummary } from "@/lib/calc";
 import { BANKS, GROUPS } from "@/lib/constants";
-import { money } from "@/lib/format";
+import { money, norm } from "@/lib/format";
 import { monthLabel } from "@/lib/dates";
 import { downloadXlsx, exDate, type Cell } from "@/lib/export";
 import type { BankId, Movement } from "@/lib/types";
@@ -21,10 +21,6 @@ function fmtDate(iso: string) {
   if (!iso) return "";
   const [y, m, d] = iso.split("-");
   return `${d}/${m}/${y}`;
-}
-
-function norm(s: string) {
-  return (s || "").toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
 }
 
 type SearchCol = "todas" | "descripcion" | "proveedor" | "cheque";

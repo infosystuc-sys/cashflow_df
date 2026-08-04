@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { money, num, parseNum } from "./format";
+import { money, norm, num, parseNum } from "./format";
 
 describe("money", () => {
   it("renders zero as a dash", () => {
@@ -56,5 +56,16 @@ describe("parseNum", () => {
 
   it("returns 0 for unparsable strings", () => {
     expect(parseNum("abc")).toBe(0);
+  });
+});
+
+describe("norm", () => {
+  it("lowercases and strips diacritics", () => {
+    expect(norm("ESTACIÓN El Bajo")).toBe("estacion el bajo");
+  });
+
+  it("returns an empty string for empty or undefined input", () => {
+    expect(norm("")).toBe("");
+    expect(norm(undefined as unknown as string)).toBe("");
   });
 });
