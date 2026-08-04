@@ -5,6 +5,7 @@ import type { CashflowState, Cheque, Movement } from "@/lib/types";
 import {
   fetchAllData,
   insertMovement,
+  insertMovements,
   updateMovement as updateMovementInDb,
   deleteMovement as deleteMovementInDb,
   upsertProjectionCell,
@@ -24,6 +25,7 @@ interface CashflowContextValue {
   loading: boolean;
   error: string | null;
   addMovement: (m: Omit<Movement, "id">) => Promise<void>;
+  addMovements: (rows: Omit<Movement, "id">[]) => Promise<void>;
   updateMovement: (m: Movement) => Promise<void>;
   deleteMovement: (id: string) => Promise<void>;
   setProjectionCell: (conceptId: string, monthKey: string, cantidad: number, precio: number) => Promise<void>;
@@ -55,6 +57,11 @@ export function CashflowProvider({ children }: { children: ReactNode }) {
   const addMovement = async (m: Omit<Movement, "id">) => {
     const created = await insertMovement(m);
     setState((s) => (s ? { ...s, movements: [...s.movements, created] } : s));
+  };
+
+  const addMovements = async (rows: Omit<Movement, "id">[]) => {
+    const created = await insertMovements(rows);
+    setState((s) => (s ? { ...s, movements: [...s.movements, ...created] } : s));
   };
 
   const updateMovement = async (m: Movement) => {
@@ -146,6 +153,7 @@ export function CashflowProvider({ children }: { children: ReactNode }) {
     loading,
     error,
     addMovement,
+    addMovements,
     updateMovement,
     deleteMovement,
     setProjectionCell,

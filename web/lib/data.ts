@@ -139,6 +139,39 @@ export async function insertMovement(m: Omit<Movement, "id">): Promise<Movement>
   };
 }
 
+export async function insertMovements(rows: Omit<Movement, "id">[]): Promise<Movement[]> {
+  if (!rows.length) return [];
+  const { data, error } = await supabase
+    .from("movements")
+    .insert(
+      rows.map((m) => ({
+        bank: m.bank,
+        descripcion: m.descripcion,
+        proveedor: m.proveedor,
+        fecha_emision: m.fechaEmision || null,
+        fecha_pago: m.fechaPago,
+        cheque: m.cheque,
+        credito: m.credito,
+        debito: m.debito,
+        grupo: m.grupo,
+      }))
+    )
+    .select();
+  if (error) throw error;
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    bank: row.bank,
+    descripcion: row.descripcion,
+    proveedor: row.proveedor,
+    fechaEmision: row.fecha_emision ?? "",
+    fechaPago: row.fecha_pago,
+    cheque: row.cheque,
+    credito: Number(row.credito),
+    debito: Number(row.debito),
+    grupo: row.grupo,
+  }));
+}
+
 export async function updateMovement(m: Movement): Promise<void> {
   const { error } = await supabase
     .from("movements")
