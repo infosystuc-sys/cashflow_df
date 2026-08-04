@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Modal, GroupChip } from "@/components/ui";
-import type { ParsedRow } from "@/lib/import";
+import type { ParsedRow, ImportRowError } from "@/lib/import";
 
 function fmtDate(iso: string) {
   if (!iso) return "";
@@ -13,12 +13,14 @@ function fmtDate(iso: string) {
 export function ImportReviewModal({
   rows,
   duplicateIds,
+  skippedErrors,
   onConfirm,
   onClose,
   importing,
 }: {
   rows: ParsedRow[];
   duplicateIds: (string | null)[];
+  skippedErrors: ImportRowError[];
   onConfirm: (selected: ParsedRow[]) => void;
   onClose: () => void;
   importing: boolean;
@@ -53,6 +55,19 @@ export function ImportReviewModal({
       <p className="form-tip">
         {newCount} nuevos · {dupCount} posibles duplicados. Los posibles duplicados vienen destildados: tildalos si igual querés importarlos.
       </p>
+      {skippedErrors.length > 0 && (
+        <div className="import-skipped">
+          <strong>⚠ {skippedErrors.length} {skippedErrors.length === 1 ? "fila omitida" : "filas omitidas"} por errores de formato:</strong>
+          <ul className="import-errors">
+            {skippedErrors.map((e, i) => (
+              <li key={i}>
+                {e.row > 0 ? <strong>Fila {e.row}: </strong> : null}
+                {e.message}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div className="table-wrap">
         <table className="grid">
           <thead>

@@ -54,7 +54,7 @@ export type ParsedRow = {
 export type ImportRowError = { row: number; message: string };
 
 export type ParseResult =
-  | { ok: true; rows: ParsedRow[] }
+  | { ok: true; rows: ParsedRow[]; skippedErrors: ImportRowError[] }
   | { ok: false; errors: ImportRowError[] };
 
 const REQUIRED_HEADERS = ["Descripción", "F. pago", "Agrupación", "Crédito", "Débito"];
@@ -149,8 +149,11 @@ export async function parseMovementsWorkbook(buf: ArrayBuffer): Promise<ParseRes
     });
   }
 
-  if (errors.length) return { ok: false, errors };
-  return { ok: true, rows };
+  // If there are valid rows, proceed even if some rows had errors (partial import).
+  // Only fail entirely if *every* data row was invalid or there were no rows at all.
+  if (rows.length === 0 && errors.length > 0) return { ok: false, errors };
+  if (rows.length === 0) return { ok: false, errors: [{ row: 0, message: "El archivo no contiene filas de datos válidas." }] };
+  return { ok: true, rows, skippedErrors: errors };
 }
 
 // Compara una fila parseada contra los movimientos existentes del banco activo

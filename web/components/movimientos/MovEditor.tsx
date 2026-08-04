@@ -40,7 +40,7 @@ export function MovEditor({
 }) {
   const [f, setF] = useState<MovForm>(initial ? { ...initial } : { ...BLANK });
   const set = <K extends keyof MovForm>(k: K, v: MovForm[K]) => setF((p) => ({ ...p, [k]: v }));
-  const isIn = ["Ingresos", "Ingreso por Venta de USD"].includes(f.grupo);
+  const isIn = ["Ingresos", "Ingreso por Venta de USD", "Rescates"].includes(f.grupo);
   const bank = BANKS.find((b) => b.id === bankId)!;
 
   const save = () => {

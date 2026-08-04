@@ -11,6 +11,8 @@ export const GROUPS = [
   "Pagos",
   "Transf entre cuentas",
   "Ingreso por Venta de USD",
+  "Suscripciones",
+  "Rescates",
 ];
 
 export const PROJ_CONCEPTS: ProjConcept[] = [

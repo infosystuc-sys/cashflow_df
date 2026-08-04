@@ -44,7 +44,7 @@ export default function MovimientosPage() {
   const [confirm, setConfirm] = useState<Movement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importErrors, setImportErrors] = useState<ImportRowError[] | null>(null);
-  const [importReview, setImportReview] = useState<{ rows: ParsedRow[]; duplicateIds: (string | null)[] } | null>(null);
+  const [importReview, setImportReview] = useState<{ rows: ParsedRow[]; duplicateIds: (string | null)[]; skippedErrors: ImportRowError[] } | null>(null);
   const [importing, setImporting] = useState(false);
 
   // Filtros
@@ -179,7 +179,7 @@ export default function MovimientosPage() {
       }
       const bankMovements = state.movements.filter((m) => m.bank === bankId);
       const duplicateIds = result.rows.map((r) => findDuplicate(r, bankMovements)?.id ?? null);
-      setImportReview({ rows: result.rows, duplicateIds });
+      setImportReview({ rows: result.rows, duplicateIds, skippedErrors: result.skippedErrors });
     } catch (e) {
       setImportErrors([{ row: 0, message: "No se pudo leer el archivo. Verificá que sea un .xlsx válido." }]);
     }
@@ -359,9 +359,10 @@ export default function MovimientosPage() {
         <ImportErrorsModal errors={importErrors} onClose={() => setImportErrors(null)} />
       )}
       {importReview && (
-        <ImportReviewModal
+      <ImportReviewModal
           rows={importReview.rows}
           duplicateIds={importReview.duplicateIds}
+          skippedErrors={importReview.skippedErrors}
           onConfirm={confirmImport}
           onClose={() => setImportReview(null)}
           importing={importing}

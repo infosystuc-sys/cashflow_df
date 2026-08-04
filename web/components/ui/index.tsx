@@ -18,19 +18,26 @@ export function Modal({
   footer?: ReactNode;
 }) {
   useEffect(() => {
+    let id: ReturnType<typeof setTimeout>;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    // Delay registering the listener by 200ms to discard the residual
+    // Escape keydown event that Windows sends when the native file-picker
+    // dialog closes right as this modal is mounting.
+    id = setTimeout(() => window.addEventListener("keydown", onKey), 200);
+    return () => {
+      clearTimeout(id);
+      window.removeEventListener("keydown", onKey);
+    };
   }, [onClose]);
 
   // Portal to <body>: callers may render a Modal inside a <table>/<tbody>
   // (e.g. the Proyección matrix), where a fixed-position backdrop div
   // would otherwise be invalid HTML nesting.
   return createPortal(
-    <div className="modal-backdrop" onMouseDown={onClose}>
-      <div className="modal" style={{ width }} onMouseDown={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop">
+      <div className="modal" style={{ width }}>
         <div className="modal-head">
           <h3>{title}</h3>
           <button className="icon-btn" onClick={onClose} aria-label="Cerrar">
@@ -148,6 +155,8 @@ const GROUP_CHIP_CLASS: Record<string, string> = {
   "Transf entre cuentas": "chip--transf",
   "Ingreso por Venta de USD": "chip--usd",
   "Saldo Inicial": "chip--init",
+  Suscripciones: "chip--fci",
+  Rescates: "chip--fci",
 };
 
 export function GroupChip({ group }: { group: string }) {
