@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import * as XLSX from "xlsx";
-import { parseFechaCell, parseMoneyCell, parseMovementsWorkbook } from "./import";
+import { parseFechaCell, parseMoneyCell, parseMovementsWorkbook, findDuplicate } from "./import";
+import type { Movement } from "./types";
 
 describe("parseFechaCell", () => {
   it("converts dd/mm/yyyy to ISO yyyy-mm-dd", () => {
@@ -112,5 +113,38 @@ describe("parseMovementsWorkbook", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.rows).toHaveLength(1);
+  });
+});
+
+describe("findDuplicate", () => {
+  const existing: Movement[] = [
+    {
+      id: "m1", bank: "galicia", descripcion: "Pago proveedor", proveedor: "",
+      fechaEmision: "", fechaPago: "2026-08-03", cheque: "", credito: 0, debito: 500, grupo: "Pagos",
+    },
+  ];
+
+  it("matches same fechaPago + normalized descripcion + amount", () => {
+    const row = {
+      descripcion: "PAGO PROVEEDOR", proveedor: "", fechaEmision: "",
+      fechaPago: "2026-08-03", cheque: "", credito: 0, debito: 500, grupo: "Pagos",
+    };
+    expect(findDuplicate(row, existing)?.id).toBe("m1");
+  });
+
+  it("returns null when the date differs", () => {
+    const row = {
+      descripcion: "Pago proveedor", proveedor: "", fechaEmision: "",
+      fechaPago: "2026-08-04", cheque: "", credito: 0, debito: 500, grupo: "Pagos",
+    };
+    expect(findDuplicate(row, existing)).toBeNull();
+  });
+
+  it("returns null when the amount differs", () => {
+    const row = {
+      descripcion: "Pago proveedor", proveedor: "", fechaEmision: "",
+      fechaPago: "2026-08-03", cheque: "", credito: 0, debito: 501, grupo: "Pagos",
+    };
+    expect(findDuplicate(row, existing)).toBeNull();
   });
 });

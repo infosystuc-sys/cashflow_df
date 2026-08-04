@@ -3,6 +3,8 @@
 // inicial: solo se carga cuando el usuario elige un archivo para importar.
 
 import { GROUPS } from "./constants";
+import { norm } from "./format";
+import type { Movement } from "./types";
 
 // Convierte una celda de fecha en formato dd/mm/aaaa (el que usa el export) a
 // ISO 'YYYY-MM-DD'. Devuelve "" si la celda está vacía, y null si tiene
@@ -140,4 +142,19 @@ export async function parseMovementsWorkbook(buf: ArrayBuffer): Promise<ParseRes
 
   if (errors.length) return { ok: false, errors };
   return { ok: true, rows };
+}
+
+// Compara una fila parseada contra los movimientos existentes del banco activo
+// para marcar posibles duplicados: misma fecha de pago + descripción
+// normalizada + mismo importe (crédito o débito, el que corresponda).
+export function findDuplicate(row: ParsedRow, existing: Movement[]): Movement | null {
+  const amount = row.credito || row.debito;
+  return (
+    existing.find(
+      (m) =>
+        m.fechaPago === row.fechaPago &&
+        norm(m.descripcion) === norm(row.descripcion) &&
+        (m.credito || m.debito) === amount
+    ) ?? null
+  );
 }
