@@ -11,6 +11,12 @@ import type { Movement } from "./types";
 // contenido pero no matchea ese formato.
 export function parseFechaCell(v: unknown): string | null {
   if (v === null || v === undefined) return "";
+  if (v instanceof Date) {
+    const y = v.getUTCFullYear();
+    const m = v.getUTCMonth() + 1;
+    const d = v.getUTCDate();
+    return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  }
   const s = String(v).trim();
   if (!s) return "";
   const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s);
@@ -56,9 +62,12 @@ const VALID_GROUPS = GROUPS.filter((g) => g !== "Saldo Inicial");
 
 export async function parseMovementsWorkbook(buf: ArrayBuffer): Promise<ParseResult> {
   const XLSX = await import("xlsx");
-  const wb = XLSX.read(new Uint8Array(buf), { type: "array" });
+  const wb = XLSX.read(new Uint8Array(buf), { type: "array", cellDates: true });
+  if (!wb.SheetNames.length) {
+    return { ok: false, errors: [{ row: 0, message: "El archivo está vacío." }] };
+  }
   const ws = wb.Sheets[wb.SheetNames[0]];
-  const aoa = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, raw: false, defval: "" });
+  const aoa = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, raw: true, defval: "" });
 
   if (!aoa.length) {
     return { ok: false, errors: [{ row: 0, message: "El archivo está vacío." }] };

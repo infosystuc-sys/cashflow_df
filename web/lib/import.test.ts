@@ -1,4 +1,18 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+
+// Mutable hook so a single test can force XLSX.read() to return a pathological
+// (zero-sheet) workbook without affecting every other test, which all rely on
+// the real SheetJS read/write/aoa_to_sheet implementation.
+const xlsxMock = vi.hoisted(() => ({ readOverride: null as ((...args: unknown[]) => unknown) | null }));
+
+vi.mock("xlsx", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("xlsx")>();
+  return {
+    ...actual,
+    read: (...args: unknown[]) => (xlsxMock.readOverride ? xlsxMock.readOverride(...args) : actual.read(...(args as Parameters<typeof actual.read>))),
+  };
+});
+
 import * as XLSX from "xlsx";
 import { parseFechaCell, parseMoneyCell, parseMovementsWorkbook, findDuplicate } from "./import";
 import type { Movement } from "./types";
@@ -113,6 +127,37 @@ describe("parseMovementsWorkbook", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.rows).toHaveLength(1);
+  });
+
+  it("parses a native Excel date cell for F. pago", async () => {
+    const buf = makeWorkbookBuffer([
+      ["Pago proveedor", "", "Banco Galicia", "", new Date(Date.UTC(2026, 7, 3)) as unknown as string, "", "Pagos", null, 500, 500],
+    ]);
+    const result = await parseMovementsWorkbook(buf);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.rows).toHaveLength(1);
+    expect(result.rows[0].fechaPago).toBe("2026-08-03");
+  });
+
+  it("returns ok:false with 'El archivo está vacío.' when the workbook has zero sheets", async () => {
+    // SheetJS's own XLSX.write() refuses to serialize a workbook with zero sheets
+    // (throws "Workbook is empty" from its internal check_wb before it'll write
+    // anything), so a real zero-sheet .xlsx file can't be constructed via the public
+    // write API to use as input here. Instead we force XLSX.read (mocked above) to
+    // return a parsed workbook object with an empty SheetNames array for this one
+    // test, simulating what a pathological/corrupt file would produce. This exercises
+    // the new guard in parseMovementsWorkbook directly.
+    const buf = makeWorkbookBuffer([["x"]]);
+    xlsxMock.readOverride = () => ({ SheetNames: [], Sheets: {} });
+    try {
+      const result = await parseMovementsWorkbook(buf);
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.errors[0].message).toBe("El archivo está vacío.");
+    } finally {
+      xlsxMock.readOverride = null;
+    }
   });
 });
 
