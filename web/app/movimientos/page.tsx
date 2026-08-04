@@ -45,6 +45,7 @@ export default function MovimientosPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importErrors, setImportErrors] = useState<ImportRowError[] | null>(null);
   const [importReview, setImportReview] = useState<{ rows: ParsedRow[]; duplicateIds: (string | null)[] } | null>(null);
+  const [importing, setImporting] = useState(false);
 
   // Filtros
   const [searchCol, setSearchCol] = useState<SearchCol>("todas");
@@ -169,20 +170,32 @@ export default function MovimientosPage() {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
-    const buf = await file.arrayBuffer();
-    const result = await parseMovementsWorkbook(buf);
-    if (!result.ok) {
-      setImportErrors(result.errors);
-      return;
+    try {
+      const buf = await file.arrayBuffer();
+      const result = await parseMovementsWorkbook(buf);
+      if (!result.ok) {
+        setImportErrors(result.errors);
+        return;
+      }
+      const bankMovements = state.movements.filter((m) => m.bank === bankId);
+      const duplicateIds = result.rows.map((r) => findDuplicate(r, bankMovements)?.id ?? null);
+      setImportReview({ rows: result.rows, duplicateIds });
+    } catch (e) {
+      setImportErrors([{ row: 0, message: "No se pudo leer el archivo. Verificá que sea un .xlsx válido." }]);
     }
-    const bankMovements = state.movements.filter((m) => m.bank === bankId);
-    const duplicateIds = result.rows.map((r) => findDuplicate(r, bankMovements)?.id ?? null);
-    setImportReview({ rows: result.rows, duplicateIds });
   };
 
   const confirmImport = async (selected: ParsedRow[]) => {
-    await addMovements(selected.map((r) => ({ ...r, bank: bankId })));
-    setImportReview(null);
+    setImporting(true);
+    try {
+      await addMovements(selected.map((r) => ({ ...r, bank: bankId })));
+      setImportReview(null);
+    } catch (e) {
+      setImportReview(null);
+      setImportErrors([{ row: 0, message: "No se pudo completar la importación. Verificá tu conexión e intentá de nuevo." }]);
+    } finally {
+      setImporting(false);
+    }
   };
 
   return (
@@ -351,6 +364,7 @@ export default function MovimientosPage() {
           duplicateIds={importReview.duplicateIds}
           onConfirm={confirmImport}
           onClose={() => setImportReview(null)}
+          importing={importing}
         />
       )}
     </div>

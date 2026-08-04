@@ -15,11 +15,13 @@ export function ImportReviewModal({
   duplicateIds,
   onConfirm,
   onClose,
+  importing,
 }: {
   rows: ParsedRow[];
   duplicateIds: (string | null)[];
   onConfirm: (selected: ParsedRow[]) => void;
   onClose: () => void;
+  importing: boolean;
 }) {
   const [checked, setChecked] = useState<boolean[]>(rows.map((_, i) => duplicateIds[i] === null));
   const dupCount = duplicateIds.filter((id) => id !== null).length;
@@ -40,10 +42,10 @@ export function ImportReviewModal({
           </button>
           <button
             className="btn btn--primary"
-            disabled={selectedCount === 0}
+            disabled={selectedCount === 0 || importing}
             onClick={() => onConfirm(rows.filter((_, i) => checked[i]))}
           >
-            Importar seleccionados ({selectedCount})
+            {importing ? "Importando…" : `Importar seleccionados (${selectedCount})`}
           </button>
         </>
       }
