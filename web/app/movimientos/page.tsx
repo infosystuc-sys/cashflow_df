@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useCashflow } from "@/context/CashflowContext";
 import { bankRows, bankSummary } from "@/lib/calc";
 import { BANKS, GROUPS } from "@/lib/constants";
 import { money, norm } from "@/lib/format";
 import { monthLabel } from "@/lib/dates";
 import { downloadXlsx, exDate, type Cell } from "@/lib/export";
+import { parseMovementsWorkbook, findDuplicate, type ParsedRow, type ImportRowError } from "@/lib/import";
 import type { BankId, Movement } from "@/lib/types";
 
 function currentMonthKey() {
@@ -16,6 +17,8 @@ function currentMonthKey() {
 import { Money, GroupChip, Confirm } from "@/components/ui";
 import { MovEditor } from "@/components/movimientos/MovEditor";
 import { BankSummaryCard } from "@/components/movimientos/BankSummaryCard";
+import { ImportErrorsModal } from "@/components/movimientos/ImportErrorsModal";
+import { ImportReviewModal } from "@/components/movimientos/ImportReviewModal";
 
 function fmtDate(iso: string) {
   if (!iso) return "";
@@ -35,7 +38,7 @@ const SEARCH_COLS: { id: SearchCol; label: string }[] = [
 const FILTER_GROUPS = GROUPS.filter((g) => g !== "Saldo Inicial");
 
 export default function MovimientosPage() {
-  const { state, addMovement, updateMovement, deleteMovement } = useCashflow();
+  const { state, addMovement, addMovements, updateMovement, deleteMovement } = useCashflow();
   const [bankId, setBankId] = useState<BankId>("galicia");
   const [editing, setEditing] = useState<Movement | "new" | null>(null);
   const [confirm, setConfirm] = useState<Movement | null>(null);
@@ -159,6 +162,30 @@ export default function MovimientosPage() {
     downloadXlsx(`Movimientos_${b.short}_${suffix}`, [{ name: `${b.short} ${suffix}`, aoa }]);
   };
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importErrors, setImportErrors] = useState<ImportRowError[] | null>(null);
+  const [importReview, setImportReview] = useState<{ rows: ParsedRow[]; duplicateIds: (string | null)[] } | null>(null);
+
+  const onImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    const buf = await file.arrayBuffer();
+    const result = await parseMovementsWorkbook(buf);
+    if (!result.ok) {
+      setImportErrors(result.errors);
+      return;
+    }
+    const bankMovements = state.movements.filter((m) => m.bank === bankId);
+    const duplicateIds = result.rows.map((r) => findDuplicate(r, bankMovements)?.id ?? null);
+    setImportReview({ rows: result.rows, duplicateIds });
+  };
+
+  const confirmImport = async (selected: ParsedRow[]) => {
+    await addMovements(selected.map((r) => ({ ...r, bank: bankId })));
+    setImportReview(null);
+  };
+
   return (
     <div className="view">
       <div className="view-head">
@@ -167,6 +194,16 @@ export default function MovimientosPage() {
           <p className="view-sub">Carga diaria por banco · se resumen automáticamente en el Cashflow por fecha de pago.</p>
         </div>
         <div className="view-head-actions">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx,.xls"
+            style={{ display: "none" }}
+            onChange={onImportFile}
+          />
+          <button className="btn btn--ghost" onClick={() => fileInputRef.current?.click()}>
+            ⭱ Importar desde Excel
+          </button>
           <button className="btn btn--ghost" onClick={exportExcel}>⭳ Exportar a Excel</button>
           <button className="btn btn--primary" onClick={() => setEditing("new")}>+ Nuevo movimiento</button>
         </div>
@@ -304,6 +341,17 @@ export default function MovimientosPage() {
           message={`¿Eliminar el movimiento “${confirm.descripcion}”?`}
           onYes={() => delMov(confirm.id)}
           onNo={() => setConfirm(null)}
+        />
+      )}
+      {importErrors && (
+        <ImportErrorsModal errors={importErrors} onClose={() => setImportErrors(null)} />
+      )}
+      {importReview && (
+        <ImportReviewModal
+          rows={importReview.rows}
+          duplicateIds={importReview.duplicateIds}
+          onConfirm={confirmImport}
+          onClose={() => setImportReview(null)}
         />
       )}
     </div>
