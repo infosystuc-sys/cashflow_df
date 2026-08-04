@@ -190,6 +190,8 @@ h1,h3{margin:0;}
 .chip--cheque-depositado{background:#fff7e6;color:#c2820a;}
 .chip--cheque-acreditado{background:#e9f7ef;color:#15803d;}
 .chip--cheque-endosado{background:#f1f3f7;color:#64748b;}
+.chip--dup{background:#fff7e6;color:#c2820a;}
+.row-dup{background:#fffaf0;}
 
 /* ---------- Subtabs ---------- */
 .subtabs{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px;margin-bottom:16px;width:max-content;box-shadow:var(--shadow);}
