@@ -11,6 +11,7 @@ export interface Movement {
   credito: number;
   debito: number;
   grupo: string;
+  transferId?: string | null; // shared id between the two legs of a "Transferencia a banco propio"
 }
 
 export interface ProjectionValue {

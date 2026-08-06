@@ -22,6 +22,7 @@ create table movements (
   credito numeric not null default 0,
   debito numeric not null default 0,
   grupo text not null,
+  transfer_id uuid,
   created_at timestamptz not null default now()
 );
 

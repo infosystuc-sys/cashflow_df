@@ -14,6 +14,7 @@ type MovementRow = {
   credito: number | string;
   debito: number | string;
   grupo: string;
+  transfer_id: string | null;
 };
 
 // Supabase/PostgREST devuelve como máximo 1000 filas por request. Para tablas que
@@ -59,6 +60,7 @@ export async function fetchAllData(): Promise<CashflowState> {
     credito: Number(row.credito),
     debito: Number(row.debito),
     grupo: row.grupo,
+    transferId: row.transfer_id ?? null,
   }));
 
   const projection: CashflowState["projection"] = {};
@@ -121,6 +123,7 @@ export async function insertMovement(m: Omit<Movement, "id">): Promise<Movement>
       credito: m.credito,
       debito: m.debito,
       grupo: m.grupo,
+      transfer_id: m.transferId ?? null,
     })
     .select()
     .single();
@@ -136,6 +139,7 @@ export async function insertMovement(m: Omit<Movement, "id">): Promise<Movement>
     credito: Number(data.credito),
     debito: Number(data.debito),
     grupo: data.grupo,
+    transferId: data.transfer_id ?? null,
   };
 }
 
@@ -154,6 +158,7 @@ export async function insertMovements(rows: Omit<Movement, "id">[]): Promise<Mov
         credito: m.credito,
         debito: m.debito,
         grupo: m.grupo,
+        transfer_id: m.transferId ?? null,
       }))
     )
     .select();
@@ -169,6 +174,7 @@ export async function insertMovements(rows: Omit<Movement, "id">[]): Promise<Mov
     credito: Number(row.credito),
     debito: Number(row.debito),
     grupo: row.grupo,
+    transferId: row.transfer_id ?? null,
   }));
 }
 
@@ -185,6 +191,7 @@ export async function updateMovement(m: Movement): Promise<void> {
       credito: m.credito,
       debito: m.debito,
       grupo: m.grupo,
+      transfer_id: m.transferId ?? null,
     })
     .eq("id", m.id);
   if (error) throw error;
