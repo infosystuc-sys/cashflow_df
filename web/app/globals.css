@@ -184,6 +184,7 @@ h1,h3{margin:0;}
 .chip--in{background:#e9f7ef;color:#15803d;}
 .chip--out{background:#fdecec;color:#dc2626;}
 .chip--transf{background:#eef0fd;color:#4f46e5;}
+.chip--transf-propio{background:#e0f2fe;color:#0369a1;}
 .chip--usd{background:#e6f6f4;color:#0d9488;}
 .chip--fci{background:#f3e8ff;color:#7e22ce;}
 .chip--init{background:#f1f3f7;color:#64748b;}

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { money, num, parseNum } from "@/lib/format";
+import { TRANSFER_OWN_BANK_GROUP } from "@/lib/constants";
 
 export function Modal({
   title,
@@ -153,6 +154,7 @@ const GROUP_CHIP_CLASS: Record<string, string> = {
   Ingresos: "chip--in",
   Pagos: "chip--out",
   "Transf entre cuentas": "chip--transf",
+  [TRANSFER_OWN_BANK_GROUP]: "chip--transf-propio",
   "Ingreso por Venta de USD": "chip--usd",
   "Saldo Inicial": "chip--init",
   Suscripciones: "chip--fci",

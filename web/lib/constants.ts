@@ -5,11 +5,14 @@ export const BANKS: Bank[] = [
   { id: "nacion", name: "Banco Nación", short: "Nación", color: "var(--nacion)" },
 ];
 
+export const TRANSFER_OWN_BANK_GROUP = "Transferencia a banco propio";
+
 export const GROUPS = [
   "Saldo Inicial",
   "Ingresos",
   "Pagos",
   "Transf entre cuentas",
+  TRANSFER_OWN_BANK_GROUP,
   "Ingreso por Venta de USD",
   "Suscripciones",
   "Rescates",
