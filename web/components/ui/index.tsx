@@ -169,10 +169,14 @@ export function Confirm({
   message,
   onYes,
   onNo,
+  yesLabel = "Eliminar",
+  extraAction,
 }: {
   message: string;
   onYes: () => void;
   onNo: () => void;
+  yesLabel?: string;
+  extraAction?: { label: string; onClick: () => void };
 }) {
   return (
     <Modal
@@ -184,8 +188,13 @@ export function Confirm({
           <button className="btn btn--ghost" onClick={onNo}>
             Cancelar
           </button>
+          {extraAction && (
+            <button className="btn btn--ghost" onClick={extraAction.onClick}>
+              {extraAction.label}
+            </button>
+          )}
           <button className="btn btn--danger" onClick={onYes}>
-            Eliminar
+            {yesLabel}
           </button>
         </>
       }
