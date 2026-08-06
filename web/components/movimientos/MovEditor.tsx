@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Modal, Field, MoneyInput } from "@/components/ui";
-import { BANKS, GROUPS } from "@/lib/constants";
+import { BANKS, GROUPS, TRANSFER_OWN_BANK_GROUP } from "@/lib/constants";
+import { money } from "@/lib/format";
 import type { BankId, Movement } from "@/lib/types";
 
 type MovForm = {
@@ -27,33 +28,72 @@ const BLANK: MovForm = {
   grupo: "Pagos",
 };
 
+function fmtDate(iso: string) {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("-");
+  return `${d}/${m}/${y}`;
+}
+
 export function MovEditor({
   bankId,
   initial,
+  linkedBankName,
   onSave,
+  onSaveTransfer,
   onClose,
 }: {
   bankId: BankId;
   initial: Movement | null;
+  linkedBankName?: string;
   onSave: (mov: Movement | Omit<Movement, "id">) => void;
+  onSaveTransfer: (legA: Omit<Movement, "id">, legB: Omit<Movement, "id">) => void;
   onClose: () => void;
 }) {
   const [f, setF] = useState<MovForm>(initial ? { ...initial } : { ...BLANK });
+  const [confirmingTransfer, setConfirmingTransfer] = useState(false);
   const set = <K extends keyof MovForm>(k: K, v: MovForm[K]) => setF((p) => ({ ...p, [k]: v }));
   const isIn = ["Ingresos", "Ingreso por Venta de USD", "Rescates"].includes(f.grupo);
   const bank = BANKS.find((b) => b.id === bankId)!;
+  const otherBank = BANKS.find((b) => b.id !== bankId)!;
+  const isLinkedEdit = !!(initial && linkedBankName);
+  const isNewTransfer = !initial && f.grupo === TRANSFER_OWN_BANK_GROUP;
 
-  const save = () => {
+  const validate = () => {
     if (!f.descripcion.trim()) {
       alert("La descripción es obligatoria.");
-      return;
+      return false;
     }
     if (!f.fechaPago) {
       alert("La fecha de pago es obligatoria (define el mes del cashflow).");
+      return false;
+    }
+    return true;
+  };
+
+  const save = () => {
+    if (!validate()) return;
+
+    if (isNewTransfer && !confirmingTransfer) {
+      setConfirmingTransfer(true);
       return;
     }
+
+    if (isNewTransfer && confirmingTransfer) {
+      const transferId = crypto.randomUUID();
+      const legA: Omit<Movement, "id"> = { ...f, bank: bankId, transferId };
+      const legB: Omit<Movement, "id"> = {
+        ...f,
+        bank: otherBank.id,
+        credito: f.debito,
+        debito: f.credito,
+        transferId,
+      };
+      onSaveTransfer(legA, legB);
+      return;
+    }
+
     if (initial) {
-      onSave({ ...f, bank: bankId, id: initial.id });
+      onSave({ ...f, bank: bankId, id: initial.id, transferId: initial.transferId ?? null });
     } else {
       onSave({ ...f, bank: bankId });
     }
@@ -65,48 +105,75 @@ export function MovEditor({
       width={640}
       onClose={onClose}
       footer={
-        <>
-          <button className="btn btn--ghost" onClick={onClose}>Cancelar</button>
-          <button className="btn btn--primary" onClick={save}>{initial ? "Guardar cambios" : "Agregar"}</button>
-        </>
+        confirmingTransfer ? (
+          <>
+            <button className="btn btn--ghost" onClick={() => setConfirmingTransfer(false)}>Volver</button>
+            <button className="btn btn--primary" onClick={save}>Confirmar y crear ambos</button>
+          </>
+        ) : (
+          <>
+            <button className="btn btn--ghost" onClick={onClose}>Cancelar</button>
+            <button className="btn btn--primary" onClick={save}>{initial ? "Guardar cambios" : "Agregar"}</button>
+          </>
+        )
       }
     >
-      <div className="form-grid">
-        <Field label="Descripción" wide>
-          <input className="inp" autoFocus value={f.descripcion} onChange={(e) => set("descripcion", e.target.value)} placeholder="Ej: ESTACION EL BAJO" />
-        </Field>
-        <Field label="Proveedor / Cliente" wide>
-          <input className="inp" value={f.proveedor} onChange={(e) => set("proveedor", e.target.value)} placeholder="Opcional" />
-        </Field>
-        <Field label="Agrupación" wide>
-          <select className="inp" value={f.grupo} onChange={(e) => set("grupo", e.target.value)}>
-            {GROUPS.filter((g) => g !== "Saldo Inicial").map((g) => (
-              <option key={g} value={g}>{g}</option>
-            ))}
-          </select>
-        </Field>
-        <Field label="Fecha de emisión">
-          <input className="inp" type="date" value={f.fechaEmision} onChange={(e) => set("fechaEmision", e.target.value)} />
-        </Field>
-        <Field label="Fecha de pago" hint="Define el mes en el cashflow">
-          <input className="inp" type="date" value={f.fechaPago} onChange={(e) => set("fechaPago", e.target.value)} />
-        </Field>
-        <Field label="Cheque / Nº">
-          <input className="inp" value={f.cheque} onChange={(e) => set("cheque", e.target.value)} placeholder="Opcional" />
-        </Field>
-        <div className="field"></div>
-        <Field label={<span style={{ color: "var(--pos)" }}>Crédito (ingreso)</span>}>
-          <MoneyInput value={f.credito} onChange={(v) => set("credito", v)} />
-        </Field>
-        <Field label={<span style={{ color: "var(--neg)" }}>Débito (egreso)</span>}>
-          <MoneyInput value={f.debito} onChange={(v) => set("debito", v)} />
-        </Field>
-      </div>
-      <p className="form-tip">
-        {isIn
-          ? "Sugerencia: para ingresos cargá el monto en Crédito."
-          : "Sugerencia: para pagos y transferencias salientes cargá el monto en Débito."}
-      </p>
+      {confirmingTransfer ? (
+        <div className="transfer-preview">
+          <p>
+            Se registrará en <strong>{bank.name}</strong>:{" "}
+            {f.credito ? `crédito de ${money(f.credito)}` : `débito de ${money(f.debito)}`} el{" "}
+            {fmtDate(f.fechaPago)} — {f.descripcion}.
+          </p>
+          <p>
+            Se creará automáticamente en <strong>{otherBank.name}</strong>:{" "}
+            {f.credito ? `débito de ${money(f.credito)}` : `crédito de ${money(f.debito)}`} el{" "}
+            {fmtDate(f.fechaPago)} — {f.descripcion}.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="form-grid">
+            <Field label="Descripción" wide>
+              <input className="inp" autoFocus value={f.descripcion} onChange={(e) => set("descripcion", e.target.value)} placeholder="Ej: ESTACION EL BAJO" />
+            </Field>
+            <Field label="Proveedor / Cliente" wide>
+              <input className="inp" value={f.proveedor} onChange={(e) => set("proveedor", e.target.value)} placeholder="Opcional" />
+            </Field>
+            <Field label="Agrupación" wide>
+              <select className="inp" value={f.grupo} onChange={(e) => set("grupo", e.target.value)} disabled={isLinkedEdit}>
+                {GROUPS.filter((g) => g !== "Saldo Inicial").map((g) => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Fecha de emisión">
+              <input className="inp" type="date" value={f.fechaEmision} onChange={(e) => set("fechaEmision", e.target.value)} />
+            </Field>
+            <Field label="Fecha de pago" hint="Define el mes en el cashflow">
+              <input className="inp" type="date" value={f.fechaPago} onChange={(e) => set("fechaPago", e.target.value)} />
+            </Field>
+            <Field label="Cheque / Nº">
+              <input className="inp" value={f.cheque} onChange={(e) => set("cheque", e.target.value)} placeholder="Opcional" />
+            </Field>
+            <div className="field"></div>
+            <Field label={<span style={{ color: "var(--pos)" }}>Crédito (ingreso)</span>}>
+              <MoneyInput value={f.credito} onChange={(v) => set("credito", v)} />
+            </Field>
+            <Field label={<span style={{ color: "var(--neg)" }}>Débito (egreso)</span>}>
+              <MoneyInput value={f.debito} onChange={(v) => set("debito", v)} />
+            </Field>
+          </div>
+          <p className="form-tip">
+            {isIn
+              ? "Sugerencia: para ingresos cargá el monto en Crédito."
+              : "Sugerencia: para pagos y transferencias salientes cargá el monto en Débito."}
+          </p>
+          {isLinkedEdit && (
+            <p className="form-tip">🔗 Vinculado con {linkedBankName}. Los cambios se reflejan también ahí.</p>
+          )}
+        </>
+      )}
     </Modal>
   );
 }
