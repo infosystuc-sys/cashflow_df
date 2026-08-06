@@ -128,6 +128,11 @@ export default function MovimientosPage() {
     return { inicial, ingresos, ventaUSD, pagos, transf, transfPropio, final, control };
   }, [rows, filtered, firstIdx, summary]);
 
+  const confirmCounterpart = useMemo(() => {
+    if (!state || !confirm || !confirm.transferId) return null;
+    return state.movements.find((m) => m.transferId === confirm.transferId && m.id !== confirm.id) ?? null;
+  }, [state, confirm]);
+
   if (!state || !summary) return null;
 
   const b = BANKS.find((x) => x.id === bankId)!;
@@ -174,11 +179,6 @@ export default function MovimientosPage() {
     addMovements([legA, legB]);
     setEditing(null);
   };
-
-  const confirmCounterpart = useMemo(() => {
-    if (!state || !confirm || !confirm.transferId) return null;
-    return state.movements.find((m) => m.transferId === confirm.transferId && m.id !== confirm.id) ?? null;
-  }, [state, confirm]);
 
   const delMov = (id: string) => {
     deleteMovement(id);
