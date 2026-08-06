@@ -4,7 +4,7 @@ import { Fragment, useMemo, useState } from "react";
 import { useCashflow } from "@/context/CashflowContext";
 import { buildCashflow, projTotal } from "@/lib/calc";
 import { monthLabel } from "@/lib/dates";
-import { PROJ_CONCEPTS, IVA_ROWS } from "@/lib/constants";
+import { PROJ_CONCEPTS, IVA_ROWS, TRANSFER_OWN_BANK_GROUP } from "@/lib/constants";
 import { Money } from "@/components/ui";
 import { CellDetailModal, type DrillMode } from "@/components/cashflow/CellDetailModal";
 import { downloadXlsx, type Cell } from "@/lib/export";
@@ -149,7 +149,7 @@ export default function CashflowPage() {
     row("Ingreso por Venta de USD", (r) => r.ventaUSD);
     row("Pagos", (r) => r.pagos);
     row("Inversiones en FCI", (r) => r.invFCI);
-    row("Transf entre cuentas", (r) => r.transf);
+    row("Transf. entre cuentas / banco propio", (r) => r.transf);
     row("Saldo final Bancos", (r) => r.saldoFinalBanco, "last");
     section("FCI / INVERSIONES");
     row("Saldo Inicial FCI", (r) => r.saldoInicialFci, "none");
@@ -221,7 +221,7 @@ export default function CashflowPage() {
             <CfRow hideEmpty={hideEmpty} label="Ingreso por Venta de USD" rows={rows} get={(r) => r.ventaUSD} opts={{ blankZero: true }} drill={{ grupos: ["Ingreso por Venta de USD"], mode: "credito" }} onDrill={openDrill} />
             <CfRow hideEmpty={hideEmpty} label="Pagos" rows={rows} get={(r) => r.pagos} opts={{ blankZero: true, cls: "neg-row" }} drill={{ grupos: ["Pagos"], mode: "debito" }} onDrill={openDrill} />
             <CfRow hideEmpty={hideEmpty} label="Inversiones en FCI" rows={rows} get={(r) => r.invFCI} opts={{ blankZero: true, signed: true }} />
-            <CfRow hideEmpty={hideEmpty} label="Transf entre cuentas" rows={rows} get={(r) => r.transf} opts={{ blankZero: true, signed: true }} drill={{ grupos: ["Transf entre cuentas"], mode: "neto" }} onDrill={openDrill} />
+            <CfRow hideEmpty={hideEmpty} label="Transf. entre cuentas / banco propio" rows={rows} get={(r) => r.transf} opts={{ blankZero: true, signed: true }} drill={{ grupos: ["Transf entre cuentas", TRANSFER_OWN_BANK_GROUP], mode: "neto" }} onDrill={openDrill} />
             <CfRow hideEmpty={hideEmpty} label="Saldo final Bancos" rows={rows} get={(r) => r.saldoFinalBanco} opts={{ cls: "cf-strong", bold: true, totalMode: "last", signed: true }} />
 
             <CfSectionRow label="FCI / INVERSIONES" months={months} accent="var(--violet)" />

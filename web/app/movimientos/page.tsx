@@ -151,33 +151,41 @@ export default function MovimientosPage() {
     setMonthSel(null);
   };
 
-  const saveMov = (mov: Movement | Omit<Movement, "id">) => {
-    if ("id" in mov) {
-      updateMovement(mov);
-      if (mov.transferId) {
-        const counterpart = state.movements.find((m) => m.transferId === mov.transferId && m.id !== mov.id);
-        if (counterpart) {
-          updateMovement({
-            ...counterpart,
-            descripcion: mov.descripcion,
-            proveedor: mov.proveedor,
-            fechaEmision: mov.fechaEmision,
-            fechaPago: mov.fechaPago,
-            cheque: mov.cheque,
-            credito: mov.debito,
-            debito: mov.credito,
-          });
+  const saveMov = async (mov: Movement | Omit<Movement, "id">) => {
+    try {
+      if ("id" in mov) {
+        await updateMovement(mov);
+        if (mov.transferId) {
+          const counterpart = state.movements.find((m) => m.transferId === mov.transferId && m.id !== mov.id);
+          if (counterpart) {
+            await updateMovement({
+              ...counterpart,
+              descripcion: mov.descripcion,
+              proveedor: mov.proveedor,
+              fechaEmision: mov.fechaEmision,
+              fechaPago: mov.fechaPago,
+              cheque: mov.cheque,
+              credito: mov.debito,
+              debito: mov.credito,
+            });
+          }
         }
+      } else {
+        await addMovement(mov);
       }
-    } else {
-      addMovement(mov);
+      setEditing(null);
+    } catch (e) {
+      alert("No se pudo guardar el movimiento. Verificá tu conexión e intentá de nuevo.");
     }
-    setEditing(null);
   };
 
-  const saveTransfer = (legA: Omit<Movement, "id">, legB: Omit<Movement, "id">) => {
-    addMovements([legA, legB]);
-    setEditing(null);
+  const saveTransfer = async (legA: Omit<Movement, "id">, legB: Omit<Movement, "id">) => {
+    try {
+      await addMovements([legA, legB]);
+      setEditing(null);
+    } catch (e) {
+      alert("No se pudo guardar la transferencia vinculada. Verificá tu conexión e intentá de nuevo.");
+    }
   };
 
   const delMov = (id: string) => {
@@ -185,11 +193,15 @@ export default function MovimientosPage() {
     setConfirm(null);
   };
 
-  const delBoth = () => {
+  const delBoth = async () => {
     if (!confirm) return;
-    deleteMovement(confirm.id);
-    if (confirmCounterpart) deleteMovement(confirmCounterpart.id);
-    setConfirm(null);
+    try {
+      await deleteMovement(confirm.id);
+      if (confirmCounterpart) await deleteMovement(confirmCounterpart.id);
+      setConfirm(null);
+    } catch (e) {
+      alert("No se pudo eliminar el movimiento vinculado. Verificá tu conexión e intentá de nuevo.");
+    }
   };
 
   const exportExcel = () => {
