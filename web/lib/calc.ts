@@ -1,5 +1,5 @@
 import type { BankId, BankRow, BankSummary, CashflowResult, CashflowState } from "./types";
-import { PROJ_CONCEPTS } from "./constants";
+import { PROJ_CONCEPTS, TRANSFER_OWN_BANK_GROUP } from "./constants";
 import { monthKeyFromISO, monthLabel, monthRange } from "./dates";
 
 // Movimientos de un banco ordenados por fechaPago (estable) con saldo corriente
@@ -36,13 +36,16 @@ export function bankSummary(state: CashflowState, bankId: BankId): BankSummary {
   const transf =
     sum((r) => r.grupo === "Transf entre cuentas", "credito") -
     sum((r) => r.grupo === "Transf entre cuentas", "debito");
-  const final = inicial + ingresos + ventaUSD - pagos + transf;
+  const transfPropio =
+    sum((r) => r.grupo === TRANSFER_OWN_BANK_GROUP, "credito") -
+    sum((r) => r.grupo === TRANSFER_OWN_BANK_GROUP, "debito");
+  const final = inicial + ingresos + ventaUSD - pagos + transf + transfPropio;
 
   const last = bankRows(state, bankId).slice(-1)[0];
   const lastSaldo = last ? last.saldo : inicial;
   const control = final - lastSaldo;
 
-  return { inicial, ingresos, ventaUSD, pagos, transf, final, control };
+  return { inicial, ingresos, ventaUSD, pagos, transf, transfPropio, final, control };
 }
 
 // Proyección: total por concepto y mes
@@ -65,9 +68,9 @@ export function realMonth(state: CashflowState, monthKey: string) {
   const ingresos = sum((r) => r.grupo === "Ingresos", "credito");
   const ventaUSD = sum((r) => r.grupo === "Ingreso por Venta de USD", "credito");
   const pagos = sum((r) => r.grupo === "Pagos", "debito");
-  const transf =
-    sum((r) => r.grupo === "Transf entre cuentas", "credito") -
-    sum((r) => r.grupo === "Transf entre cuentas", "debito");
+  const isTransf = (r: CashflowState["movements"][number]) =>
+    r.grupo === "Transf entre cuentas" || r.grupo === TRANSFER_OWN_BANK_GROUP;
+  const transf = sum(isTransf, "credito") - sum(isTransf, "debito");
 
   return { ingresos, ventaUSD, pagos, transf };
 }

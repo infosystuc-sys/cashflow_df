@@ -80,12 +80,12 @@ describe("bankRows", () => {
 describe("bankSummary", () => {
   it("computes totals and a zero control for galicia", () => {
     const s = bankSummary(makeFixture(), "galicia");
-    expect(s).toEqual({ inicial: 1000, ingresos: 300, ventaUSD: 0, pagos: 100, transf: 200, final: 1400, control: 0 });
+    expect(s).toEqual({ inicial: 1000, ingresos: 300, ventaUSD: 0, pagos: 100, transf: 200, transfPropio: 0, final: 1400, control: 0 });
   });
 
   it("computes totals and a zero control for nacion", () => {
     const s = bankSummary(makeFixture(), "nacion");
-    expect(s).toEqual({ inicial: 500, ingresos: 0, ventaUSD: 0, pagos: 0, transf: -200, final: 300, control: 0 });
+    expect(s).toEqual({ inicial: 500, ingresos: 0, ventaUSD: 0, pagos: 0, transf: -200, transfPropio: 0, final: 300, control: 0 });
   });
 });
 
@@ -173,5 +173,54 @@ describe("buildCashflow", () => {
     expect(feb.chequesRechazados).toBe(70); // c4 vuelve a cartera
     expect(feb.chequesSaldoFinal).toBe(470); // 400 + 70 = c1 (400) + c4 (70) en cartera al final
     expect(feb.chequesAcreditado).toBe(50); // c3 confirmado en febrero
+  });
+});
+
+function makeTransferFixture(): CashflowState {
+  return {
+    settings: { saldoInicial: { galicia: 0, nacion: 0 }, rangeStart: "2025-01", rangeEnd: "2025-01" },
+    movements: [
+      { id: "t1", bank: "galicia", descripcion: "Transferencia interna", proveedor: "", fechaEmision: "", fechaPago: "2025-01-05", cheque: "", credito: 0, debito: 500, grupo: "Transferencia a banco propio", transferId: "tr-1" },
+      { id: "t2", bank: "nacion", descripcion: "Transferencia interna", proveedor: "", fechaEmision: "", fechaPago: "2025-01-05", cheque: "", credito: 500, debito: 0, grupo: "Transferencia a banco propio", transferId: "tr-1" },
+    ],
+    projection: emptyProjection(),
+    fci: { saldoInicial: 0, data: {} },
+    iva: emptyIva(),
+    cheques: [],
+  };
+}
+
+describe("bankSummary — Transferencia a banco propio", () => {
+  it("keeps it in a separate bucket from Transf entre cuentas, per bank", () => {
+    const galicia = bankSummary(makeTransferFixture(), "galicia");
+    expect(galicia.transf).toBe(0);
+    expect(galicia.transfPropio).toBe(-500);
+    expect(galicia.final).toBe(-500);
+    expect(galicia.control).toBe(0);
+
+    const nacion = bankSummary(makeTransferFixture(), "nacion");
+    expect(nacion.transf).toBe(0);
+    expect(nacion.transfPropio).toBe(500);
+    expect(nacion.final).toBe(500);
+    expect(nacion.control).toBe(0);
+  });
+});
+
+describe("realMonth — Transferencia a banco propio", () => {
+  it("counts it together with Transf entre cuentas in the combined total", () => {
+    // A single, deliberately unmatched leg (no counterpart in this fixture)
+    // isolates whether realMonth's transf bucket picks up this grupo at all —
+    // a balanced pair would net to 0 either way and wouldn't catch a missing merge.
+    const state: CashflowState = {
+      settings: { saldoInicial: { galicia: 0, nacion: 0 }, rangeStart: "2025-01", rangeEnd: "2025-01" },
+      movements: [
+        { id: "t1", bank: "galicia", descripcion: "Transferencia interna", proveedor: "", fechaEmision: "", fechaPago: "2025-01-05", cheque: "", credito: 500, debito: 0, grupo: "Transferencia a banco propio" },
+      ],
+      projection: emptyProjection(),
+      fci: { saldoInicial: 0, data: {} },
+      iva: emptyIva(),
+      cheques: [],
+    };
+    expect(realMonth(state, "2025-01").transf).toBe(500);
   });
 });
