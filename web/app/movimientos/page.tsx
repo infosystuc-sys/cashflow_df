@@ -57,6 +57,13 @@ export default function MovimientosPage() {
   const rows = useMemo(() => (state ? bankRows(state, bankId) : []), [state, bankId]);
   const summary = useMemo(() => (state ? bankSummary(state, bankId) : null), [state, bankId]);
 
+  const editingCounterpart = useMemo(() => {
+    if (!state || !editing || editing === "new" || !editing.transferId) return null;
+    return state.movements.find((m) => m.transferId === editing.transferId && m.id !== editing.id) ?? null;
+  }, [state, editing]);
+
+  const linkedBankName = editingCounterpart ? BANKS.find((b) => b.id === editingCounterpart.bank)?.name : undefined;
+
   // Meses con datos (ambos bancos), ordenados, para navegar por bloques de mes.
   const months = useMemo(() => {
     if (!state) return [] as string[];
@@ -142,14 +149,46 @@ export default function MovimientosPage() {
   const saveMov = (mov: Movement | Omit<Movement, "id">) => {
     if ("id" in mov) {
       updateMovement(mov);
+      if (mov.transferId) {
+        const counterpart = state.movements.find((m) => m.transferId === mov.transferId && m.id !== mov.id);
+        if (counterpart) {
+          updateMovement({
+            ...counterpart,
+            descripcion: mov.descripcion,
+            proveedor: mov.proveedor,
+            fechaEmision: mov.fechaEmision,
+            fechaPago: mov.fechaPago,
+            cheque: mov.cheque,
+            credito: mov.debito,
+            debito: mov.credito,
+          });
+        }
+      }
     } else {
       addMovement(mov);
     }
     setEditing(null);
   };
 
+  const saveTransfer = (legA: Omit<Movement, "id">, legB: Omit<Movement, "id">) => {
+    addMovements([legA, legB]);
+    setEditing(null);
+  };
+
+  const confirmCounterpart = useMemo(() => {
+    if (!state || !confirm || !confirm.transferId) return null;
+    return state.movements.find((m) => m.transferId === confirm.transferId && m.id !== confirm.id) ?? null;
+  }, [state, confirm]);
+
   const delMov = (id: string) => {
     deleteMovement(id);
+    setConfirm(null);
+  };
+
+  const delBoth = () => {
+    if (!confirm) return;
+    deleteMovement(confirm.id);
+    if (confirmCounterpart) deleteMovement(confirmCounterpart.id);
     setConfirm(null);
   };
 
@@ -345,13 +384,24 @@ export default function MovimientosPage() {
         <MovEditor
           bankId={bankId}
           initial={editing === "new" ? null : editing}
+          linkedBankName={linkedBankName}
           onSave={saveMov}
+          onSaveTransfer={saveTransfer}
           onClose={() => setEditing(null)}
         />
       )}
-      {confirm && (
+      {confirm && confirmCounterpart && (
         <Confirm
-          message={`¿Eliminar el movimiento “${confirm.descripcion}”?`}
+          message={`"${confirm.descripcion}" está vinculado con ${BANKS.find((b) => b.id === confirmCounterpart.bank)?.name}. ¿Qué querés eliminar?`}
+          yesLabel="Eliminar los dos"
+          onYes={delBoth}
+          onNo={() => setConfirm(null)}
+          extraAction={{ label: "Eliminar solo este", onClick: () => delMov(confirm.id) }}
+        />
+      )}
+      {confirm && !confirmCounterpart && (
+        <Confirm
+          message={`¿Eliminar el movimiento "${confirm.descripcion}"?`}
           onYes={() => delMov(confirm.id)}
           onNo={() => setConfirm(null)}
         />
