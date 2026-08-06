@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import { useCashflow } from "@/context/CashflowContext";
 import { bankRows, bankSummary } from "@/lib/calc";
-import { BANKS, GROUPS } from "@/lib/constants";
+import { BANKS, GROUPS, TRANSFER_OWN_BANK_GROUP } from "@/lib/constants";
 import { money, norm } from "@/lib/format";
 import { monthLabel } from "@/lib/dates";
 import { downloadXlsx, exDate, type Cell } from "@/lib/export";
@@ -106,7 +106,7 @@ export default function MovimientosPage() {
   const viewSummary = useMemo(() => {
     const absInicial = summary ? summary.inicial : 0;
     const inicial = firstIdx > 0 ? rows[firstIdx - 1].saldo : absInicial;
-    let ingresos = 0, ventaUSD = 0, pagos = 0, transf = 0;
+    let ingresos = 0, ventaUSD = 0, pagos = 0, transf = 0, transfPropio = 0;
     for (const r of filtered) {
       const cr = Number(r.credito) || 0;
       const de = Number(r.debito) || 0;
@@ -114,10 +114,11 @@ export default function MovimientosPage() {
       else if (r.grupo === "Ingreso por Venta de USD") ventaUSD += cr;
       else if (r.grupo === "Pagos") pagos += de;
       else if (r.grupo === "Transf entre cuentas") transf += cr - de;
+      else if (r.grupo === TRANSFER_OWN_BANK_GROUP) transfPropio += cr - de;
     }
     const final = filtered.length ? filtered[filtered.length - 1].saldo : inicial;
-    const control = inicial + ingresos + ventaUSD - pagos + transf - final;
-    return { inicial, ingresos, ventaUSD, pagos, transf, final, control };
+    const control = inicial + ingresos + ventaUSD - pagos + transf + transfPropio - final;
+    return { inicial, ingresos, ventaUSD, pagos, transf, transfPropio, final, control };
   }, [rows, filtered, firstIdx, summary]);
 
   if (!state || !summary) return null;

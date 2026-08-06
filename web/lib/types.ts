@@ -76,6 +76,7 @@ export interface BankSummary {
   ventaUSD: number;
   pagos: number;
   transf: number;
+  transfPropio: number;
   final: number;
   control: number;
 }

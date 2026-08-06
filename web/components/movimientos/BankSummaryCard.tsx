@@ -10,6 +10,7 @@ export function BankSummaryCard({ summary, bankId }: { summary: BankSummary; ban
     { k: "Venta de USD", v: summary.ventaUSD, cls: "pos" },
     { k: "Pagos", v: summary.pagos, cls: "neg" },
     { k: "Transf entre cuentas", v: summary.transf },
+    { k: "Transferencia a banco propio", v: summary.transfPropio },
   ];
 
   return (
