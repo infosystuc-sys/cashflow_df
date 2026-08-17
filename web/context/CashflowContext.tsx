@@ -24,7 +24,7 @@ interface CashflowContextValue {
   state: CashflowState | null;
   loading: boolean;
   error: string | null;
-  addMovement: (m: Omit<Movement, "id">) => Promise<void>;
+  addMovement: (m: Omit<Movement, "id">) => Promise<Movement>;
   addMovements: (rows: Omit<Movement, "id">[]) => Promise<void>;
   updateMovement: (m: Movement) => Promise<void>;
   deleteMovement: (id: string) => Promise<void>;
@@ -57,6 +57,7 @@ export function CashflowProvider({ children }: { children: ReactNode }) {
   const addMovement = async (m: Omit<Movement, "id">) => {
     const created = await insertMovement(m);
     setState((s) => (s ? { ...s, movements: [...s.movements, created] } : s));
+    return created;
   };
 
   const addMovements = async (rows: Omit<Movement, "id">[]) => {

@@ -6,25 +6,40 @@ import { chequesResumen } from "@/lib/calc";
 import { money } from "@/lib/format";
 import { BANKS } from "@/lib/constants";
 import { downloadXlsx, exDate, type Cell } from "@/lib/export";
-import type { Cheque, ChequeEstado } from "@/lib/types";
+import type { BankId, Cheque, ChequeEstado, Movement } from "@/lib/types";
 import { Money, Confirm } from "@/components/ui";
 import { ChequeEditor } from "@/components/cheques/ChequeEditor";
-import { ChequeActionModal } from "@/components/cheques/ChequeActionModal";
+import { ChequeActionModal, type ChequeActionExtra } from "@/components/cheques/ChequeActionModal";
 import { ChequeSummaryCard } from "@/components/cheques/ChequeSummaryCard";
 
-type Accion = "depositar" | "endosar" | "acreditar" | "rechazar";
+type Accion = "depositar" | "endosar" | "cesionar" | "rechazar";
 
 const ESTADO_LABEL: Record<ChequeEstado, string> = {
   en_cartera: "En cartera",
   depositado: "Depositado",
-  acreditado: "Acreditado",
   endosado: "Endosado",
+  cesionado: "Cesionado",
 };
 
-const ACCION_CFG: Record<Accion, { title: string; dateLabel: string; confirmLabel: string }> = {
-  depositar: { title: "Depositar cheque", dateLabel: "Fecha de depósito", confirmLabel: "Depositar" },
-  endosar: { title: "Endosar cheque", dateLabel: "Fecha de endoso", confirmLabel: "Endosar" },
-  acreditar: { title: "Acreditar cheque", dateLabel: "Fecha de acreditación", confirmLabel: "Acreditar" },
+const ACCION_CFG: Record<Accion, { title: string; dateLabel: string; confirmLabel: string; extra?: ChequeActionExtra }> = {
+  depositar: {
+    title: "Depositar cheque",
+    dateLabel: "Fecha de depósito",
+    confirmLabel: "Depositar",
+    extra: { type: "banco", label: "Banco propio", initial: "" },
+  },
+  endosar: {
+    title: "Endosar cheque",
+    dateLabel: "Fecha de endoso",
+    confirmLabel: "Endosar",
+    extra: { type: "texto", label: "Endosado a", placeholder: "Nombre del beneficiario" },
+  },
+  cesionar: {
+    title: "Ceder cheque",
+    dateLabel: "Fecha de cesión",
+    confirmLabel: "Ceder",
+    extra: { type: "banco", label: "Banco propio", initial: "" },
+  },
   rechazar: { title: "Rechazar cheque", dateLabel: "Fecha de rechazo", confirmLabel: "Rechazar" },
 };
 
@@ -39,7 +54,7 @@ function bancoNombre(id: string) {
 }
 
 export default function ChequesPage() {
-  const { state, addCheque, updateCheque, deleteCheque } = useCashflow();
+  const { state, addCheque, updateCheque, deleteCheque, addMovement, updateMovement, deleteMovement } = useCashflow();
   const [filtro, setFiltro] = useState<ChequeEstado | "todos">("todos");
   const [editing, setEditing] = useState<Cheque | "new" | null>(null);
   const [accion, setAccion] = useState<{ cheque: Cheque; accion: Accion } | null>(null);
@@ -57,8 +72,24 @@ export default function ChequesPage() {
 
   const saveCheque = async (c: Cheque | Omit<Cheque, "id">) => {
     try {
-      if ("id" in c) await updateCheque(c);
-      else await addCheque(c);
+      if ("id" in c) {
+        await updateCheque(c);
+        if (c.movementId) {
+          const mv = state.movements.find((m) => m.id === c.movementId);
+          if (mv) {
+            await updateMovement({
+              ...mv,
+              bank: c.bancoDestino || mv.bank,
+              proveedor: c.cliente,
+              cheque: c.numero,
+              credito: c.importe,
+              descripcion: `Cheque ${c.numero || c.cliente}`,
+            });
+          }
+        }
+      } else {
+        await addCheque(c);
+      }
       setEditing(null);
     } catch (e) {
       alert("No se pudo guardar el cheque: " + (e instanceof Error ? e.message : String(e)));
@@ -67,6 +98,8 @@ export default function ChequesPage() {
 
   const delCheque = async (id: string) => {
     try {
+      const c = state.cheques.find((x) => x.id === id);
+      if (c?.movementId) await deleteMovement(c.movementId);
       await deleteCheque(id);
       setConfirm(null);
     } catch (e) {
@@ -74,16 +107,35 @@ export default function ChequesPage() {
     }
   };
 
-  const confirmAccion = async (fecha: string) => {
+  const confirmAccion = async (fecha: string, extraValue: string) => {
     if (!accion) return;
     const { cheque, accion: a } = accion;
-    const patch: Partial<Cheque> =
-      a === "depositar" ? { estado: "depositado", fechaDeposito: fecha }
-      : a === "endosar" ? { estado: "endosado", fechaEndoso: fecha }
-      : a === "acreditar" ? { estado: "acreditado", fechaAcreditacion: fecha }
-      : { estado: "en_cartera", fechaRechazo: fecha };
     try {
-      await updateCheque({ ...cheque, ...patch });
+      if (a === "depositar" || a === "cesionar") {
+        const bank = extraValue as BankId;
+        const movement: Omit<Movement, "id"> = {
+          bank,
+          descripcion: `Cheque ${cheque.numero || cheque.cliente}`,
+          proveedor: cheque.cliente,
+          fechaEmision: "",
+          fechaPago: fecha,
+          cheque: cheque.numero,
+          credito: cheque.importe,
+          debito: 0,
+          grupo: "Ingresos",
+        };
+        const created = await addMovement(movement);
+        const patch: Partial<Cheque> =
+          a === "depositar"
+            ? { estado: "depositado", fechaDeposito: fecha, bancoDestino: bank, movementId: created.id }
+            : { estado: "cesionado", fechaCesion: fecha, bancoDestino: bank, movementId: created.id };
+        await updateCheque({ ...cheque, ...patch });
+      } else if (a === "endosar") {
+        await updateCheque({ ...cheque, estado: "endosado", fechaEndoso: fecha, endosadoA: extraValue });
+      } else {
+        if (cheque.movementId) await deleteMovement(cheque.movementId);
+        await updateCheque({ ...cheque, estado: "en_cartera", fechaRechazo: fecha, movementId: null });
+      }
     } catch (e) {
       alert("No se pudo actualizar el cheque: " + (e instanceof Error ? e.message : String(e)));
       return;
@@ -92,17 +144,24 @@ export default function ChequesPage() {
   };
 
   const exportExcel = () => {
-    const header: Cell[] = ["Cliente", "N° cheque", "Banco emisor", "Banco destino", "Importe", "F. recepción", "F. pago", "Estado", "F. depósito", "F. acreditación", "F. rechazo", "F. endoso"];
+    const header: Cell[] = ["Cliente", "N° cheque", "Banco emisor", "Banco destino", "Importe", "F. recepción", "F. pago", "Estado", "F. depósito", "F. rechazo", "F. endoso", "Endosado a", "F. cesión"];
     const aoa: Cell[][] = [header];
     rows.forEach((c) => {
       aoa.push([
         c.cliente, c.numero, c.bancoEmisor, bancoNombre(c.bancoDestino), c.importe,
         exDate(c.fechaRecepcion), exDate(c.fechaPago), ESTADO_LABEL[c.estado],
-        exDate(c.fechaDeposito), exDate(c.fechaAcreditacion), exDate(c.fechaRechazo), exDate(c.fechaEndoso),
+        exDate(c.fechaDeposito), exDate(c.fechaRechazo), exDate(c.fechaEndoso), c.endosadoA, exDate(c.fechaCesion),
       ]);
     });
     downloadXlsx(`Cheques_${filtro}`, [{ name: "Cheques", aoa }]);
   };
+
+  const accionExtra: ChequeActionExtra | undefined =
+    accion && ACCION_CFG[accion.accion].extra?.type === "banco"
+      ? { type: "banco", label: "Banco propio", initial: accion.cheque.bancoDestino }
+      : accion
+      ? ACCION_CFG[accion.accion].extra
+      : undefined;
 
   return (
     <div className="view">
@@ -140,6 +199,7 @@ export default function ChequesPage() {
               <th className="c-date">F. recepción</th>
               <th className="c-date">F. pago</th>
               <th className="c-grp">Estado</th>
+              <th className="c-prov">Endosado a</th>
               <th className="c-act"></th>
             </tr>
           </thead>
@@ -156,18 +216,17 @@ export default function ChequesPage() {
                 <td className="c-grp">
                   <span className={"chip chip--cheque-" + c.estado}>{ESTADO_LABEL[c.estado]}</span>
                 </td>
+                <td className="c-prov">{c.endosadoA}</td>
                 <td className="c-act">
                   {c.estado === "en_cartera" && (
                     <>
                       <button className="rowbtn rowbtn--text" onClick={() => setAccion({ cheque: c, accion: "depositar" })}>Depositar</button>
                       <button className="rowbtn rowbtn--text" onClick={() => setAccion({ cheque: c, accion: "endosar" })}>Endosar</button>
+                      <button className="rowbtn rowbtn--text" onClick={() => setAccion({ cheque: c, accion: "cesionar" })}>Ceder</button>
                     </>
                   )}
                   {c.estado === "depositado" && (
-                    <>
-                      <button className="rowbtn rowbtn--text" onClick={() => setAccion({ cheque: c, accion: "acreditar" })}>Acreditar</button>
-                      <button className="rowbtn rowbtn--text" onClick={() => setAccion({ cheque: c, accion: "rechazar" })}>Rechazar</button>
-                    </>
+                    <button className="rowbtn rowbtn--text" onClick={() => setAccion({ cheque: c, accion: "rechazar" })}>Rechazar</button>
                   )}
                   <button className="rowbtn" title="Editar" onClick={() => setEditing(c)}>✎</button>
                   <button className="rowbtn rowbtn--del" title="Eliminar" onClick={() => setConfirm(c)}>🗑</button>
@@ -175,7 +234,7 @@ export default function ChequesPage() {
               </tr>
             ))}
             {rows.length === 0 && (
-              <tr><td colSpan={9} className="empty">Sin cheques para este filtro. Agregá el primero con “+ Nuevo cheque”.</td></tr>
+              <tr><td colSpan={10} className="empty">Sin cheques para este filtro. Agregá el primero con “+ Nuevo cheque”.</td></tr>
             )}
           </tbody>
         </table>
@@ -191,6 +250,7 @@ export default function ChequesPage() {
       {accion && (
         <ChequeActionModal
           {...ACCION_CFG[accion.accion]}
+          extra={accionExtra}
           onConfirm={confirmAccion}
           onClose={() => setAccion(null)}
         />
