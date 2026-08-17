@@ -56,11 +56,14 @@ create table cheques (
   importe numeric not null default 0,
   fecha_recepcion date not null,
   fecha_pago date,
-  estado text not null default 'en_cartera' check (estado in ('en_cartera', 'depositado', 'acreditado', 'endosado')),
+  estado text not null default 'en_cartera' check (estado in ('en_cartera', 'depositado', 'endosado', 'cesionado')),
   fecha_deposito date,
   fecha_acreditacion date,
   fecha_rechazo date,
   fecha_endoso date,
+  fecha_cesion date,
+  endosado_a text not null default '',
+  movement_id uuid,
   created_at timestamptz not null default now()
 );
 
@@ -133,4 +136,4 @@ insert into iva_monthly (row_name, month_key, monto) values
 insert into cheques (cliente, numero, banco_emisor, banco_destino, importe, fecha_recepcion, fecha_pago, estado, fecha_deposito, fecha_acreditacion) values
 ('AGD', '0001234', 'Banco Santander', 'galicia', 14000000, '2026-06-20', '2026-06-30', 'en_cartera', null, null),
 ('RUIZ RODRIGO', '0005678', 'Banco Macro', 'nacion', 12000000, '2026-06-22', '2026-07-05', 'depositado', '2026-06-29', null),
-('ESTANCIA EL AZUL', '0009012', 'Banco Galicia', 'galicia', 8000000, '2026-05-10', '2026-05-20', 'acreditado', '2026-05-18', '2026-05-22');
+('ESTANCIA EL AZUL', '0009012', 'Banco Galicia', 'galicia', 8000000, '2026-05-10', '2026-05-20', 'depositado', '2026-05-18', '2026-05-22');

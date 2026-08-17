@@ -39,7 +39,7 @@ export interface Settings {
   rangeEnd: string; // 'YYYY-MM'
 }
 
-export type ChequeEstado = "en_cartera" | "depositado" | "acreditado" | "endosado";
+export type ChequeEstado = "en_cartera" | "depositado" | "endosado" | "cesionado";
 
 export interface Cheque {
   id: string;
@@ -52,9 +52,12 @@ export interface Cheque {
   fechaPago: string; // 'YYYY-MM-DD'
   estado: ChequeEstado;
   fechaDeposito: string; // 'YYYY-MM-DD' o ''
-  fechaAcreditacion: string; // 'YYYY-MM-DD' o ''
+  fechaAcreditacion: string; // 'YYYY-MM-DD' o '' — histórico, ya no se escribe ni se usa
   fechaRechazo: string; // 'YYYY-MM-DD' o ''
   fechaEndoso: string; // 'YYYY-MM-DD' o ''
+  fechaCesion: string; // 'YYYY-MM-DD' o ''
+  endosadoA: string; // a quién se endosó, '' si no aplica
+  movementId: string | null; // id del movimiento vinculado (Depositar/Ceder), null si no tiene
 }
 
 export interface CashflowState {
@@ -104,7 +107,6 @@ export interface CashflowRow {
   chequesSalida: number;
   chequesRechazados: number;
   chequesSaldoFinal: number;
-  chequesAcreditado: number;
 }
 
 export interface CashflowResult {

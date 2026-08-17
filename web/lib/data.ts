@@ -94,6 +94,9 @@ export async function fetchAllData(): Promise<CashflowState> {
     fechaAcreditacion: row.fecha_acreditacion ?? "",
     fechaRechazo: row.fecha_rechazo ?? "",
     fechaEndoso: row.fecha_endoso ?? "",
+    fechaCesion: row.fecha_cesion ?? "",
+    endosadoA: row.endosado_a,
+    movementId: row.movement_id ?? null,
   }));
 
   return {
@@ -280,6 +283,9 @@ function chequeToRow(c: Omit<Cheque, "id">) {
     fecha_acreditacion: c.fechaAcreditacion || null,
     fecha_rechazo: c.fechaRechazo || null,
     fecha_endoso: c.fechaEndoso || null,
+    fecha_cesion: c.fechaCesion || null,
+    endosado_a: c.endosadoA,
+    movement_id: c.movementId,
   };
 }
 
@@ -300,6 +306,9 @@ export async function insertCheque(c: Omit<Cheque, "id">): Promise<Cheque> {
     fechaAcreditacion: data.fecha_acreditacion ?? "",
     fechaRechazo: data.fecha_rechazo ?? "",
     fechaEndoso: data.fecha_endoso ?? "",
+    fechaCesion: data.fecha_cesion ?? "",
+    endosadoA: data.endosado_a,
+    movementId: data.movement_id ?? null,
   };
 }
 

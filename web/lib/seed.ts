@@ -113,16 +113,19 @@ export function seedCheques(): SeedCheque[] {
     fechaDeposito = "",
     fechaAcreditacion = "",
     fechaRechazo = "",
-    fechaEndoso = ""
+    fechaEndoso = "",
+    fechaCesion = "",
+    endosadoA = "",
+    movementId: string | null = null
   ): SeedCheque => ({
     cliente, numero, bancoEmisor, bancoDestino, importe, fechaRecepcion, fechaPago, estado,
-    fechaDeposito, fechaAcreditacion, fechaRechazo, fechaEndoso,
+    fechaDeposito, fechaAcreditacion, fechaRechazo, fechaEndoso, fechaCesion, endosadoA, movementId,
   });
 
   return [
     c("AGD", "0001234", "Banco Santander", "galicia", 14000000, "2026-06-20", "2026-06-30", "en_cartera"),
     c("RUIZ RODRIGO", "0005678", "Banco Macro", "nacion", 12000000, "2026-06-22", "2026-07-05", "depositado", "2026-06-29"),
-    c("ESTANCIA EL AZUL", "0009012", "Banco Galicia", "galicia", 8000000, "2026-05-10", "2026-05-20", "acreditado", "2026-05-18", "2026-05-22"),
+    c("ESTANCIA EL AZUL", "0009012", "Banco Galicia", "galicia", 8000000, "2026-05-10", "2026-05-20", "depositado", "2026-05-18", "2026-05-22"),
   ];
 }
 
