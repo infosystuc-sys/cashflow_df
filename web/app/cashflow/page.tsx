@@ -162,7 +162,6 @@ export default function CashflowPage() {
     row("Salida de cartera", (r) => r.chequesSalida);
     row("Rechazados (vuelven a cartera)", (r) => r.chequesRechazados);
     row("Saldo Final Cartera", (r) => r.chequesSaldoFinal, "last");
-    row("Acreditado (informativo)", (r) => r.chequesAcreditado);
     row("Saldo cierre mes Banco + FCI", (r) => r.cierreTotal, "last");
     section("INGRESOS PROYECTADOS");
     PROJ_CONCEPTS.forEach((c) => row(c.name, (r) => projTotal(st, c.id, r.key)));
@@ -236,7 +235,6 @@ export default function CashflowPage() {
             <CfRow hideEmpty={hideEmpty} label="Salida de cartera" rows={rows} get={(r) => r.chequesSalida} opts={{ blankZero: true, cls: "neg-row" }} />
             <CfRow hideEmpty={hideEmpty} label="Rechazados (vuelven a cartera)" rows={rows} get={(r) => r.chequesRechazados} opts={{ blankZero: true }} />
             <CfRow hideEmpty={hideEmpty} label="Saldo Final Cartera" rows={rows} get={(r) => r.chequesSaldoFinal} opts={{ cls: "cf-strong", bold: true, totalMode: "last" }} />
-            <CfRow hideEmpty={hideEmpty} label="Acreditado (informativo)" rows={rows} get={(r) => r.chequesAcreditado} opts={{ blankZero: true, dim: true }} />
 
             <CfRow hideEmpty={hideEmpty} label="Saldo cierre mes Banco + FCI" rows={rows} get={(r) => r.cierreTotal} opts={{ cls: "cf-grand", bold: true, totalMode: "last", signed: true }} />
 
