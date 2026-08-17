@@ -56,6 +56,9 @@ export function ChequeEditor({
         fechaAcreditacion: "",
         fechaRechazo: "",
         fechaEndoso: "",
+        fechaCesion: "",
+        endosadoA: "",
+        movementId: null,
       });
     }
   };
