@@ -89,7 +89,9 @@ function chequeEventos(c: CashflowState["cheques"][number]): ChequeEvento[] {
   if (c.fechaRecepcion) eventos.push({ fecha: c.fechaRecepcion, tipo: "recibido", importe: c.importe });
   if (c.estado === "endosado" && c.fechaEndoso) {
     eventos.push({ fecha: c.fechaEndoso, tipo: "salida", importe: c.importe });
-  } else if ((c.estado === "depositado" || c.estado === "acreditado") && c.fechaDeposito) {
+  } else if (c.estado === "cesionado" && c.fechaCesion) {
+    eventos.push({ fecha: c.fechaCesion, tipo: "salida", importe: c.importe });
+  } else if (c.estado === "depositado" && c.fechaDeposito) {
     eventos.push({ fecha: c.fechaDeposito, tipo: "salida", importe: c.importe });
   } else if (c.estado === "en_cartera" && c.fechaRechazo) {
     if (c.fechaDeposito) eventos.push({ fecha: c.fechaDeposito, tipo: "salida", importe: c.importe });
@@ -107,17 +109,14 @@ export function chequesCarteraAntes(state: CashflowState, monthKey: string): num
     .reduce((a, e) => a + (e.tipo === "salida" ? -e.importe : e.importe), 0);
 }
 
-export function chequesResumen(state: CashflowState, hoy = new Date().toISOString().slice(0, 10)) {
+export function chequesResumen(state: CashflowState) {
   const enCartera = state.cheques.filter((c) => c.estado === "en_cartera");
   const depositado = state.cheques.filter((c) => c.estado === "depositado");
-  const mesActual = monthKeyFromISO(hoy);
-  const acreditadoMes = state.cheques
-    .filter((c) => c.estado === "acreditado" && monthKeyFromISO(c.fechaAcreditacion) === mesActual)
-    .reduce((a, c) => a + c.importe, 0);
+  const cesionado = state.cheques.filter((c) => c.estado === "cesionado");
   return {
     totalCartera: enCartera.reduce((a, c) => a + c.importe, 0),
-    totalDepositadoPendiente: depositado.reduce((a, c) => a + c.importe, 0),
-    acreditadoMes,
+    totalDepositado: depositado.reduce((a, c) => a + c.importe, 0),
+    totalCedido: cesionado.reduce((a, c) => a + c.importe, 0),
     cantidadRechazados: enCartera.filter((c) => c.fechaRechazo).length,
   };
 }
@@ -127,10 +126,7 @@ export function chequesMonth(state: CashflowState, monthKey: string) {
   const recibidos = eventosMes.filter((e) => e.tipo === "recibido").reduce((a, e) => a + e.importe, 0);
   const salida = eventosMes.filter((e) => e.tipo === "salida").reduce((a, e) => a + e.importe, 0);
   const rechazados = eventosMes.filter((e) => e.tipo === "rechazo").reduce((a, e) => a + e.importe, 0);
-  const acreditado = state.cheques
-    .filter((c) => c.estado === "acreditado" && monthKeyFromISO(c.fechaAcreditacion) === monthKey)
-    .reduce((a, c) => a + c.importe, 0);
-  return { recibidos, salida, rechazados, acreditado };
+  return { recibidos, salida, rechazados };
 }
 
 // Construye la matriz completa del cashflow para el rango de meses configurado
@@ -185,7 +181,6 @@ export function buildCashflow(state: CashflowState): CashflowResult {
       chequesSalida: cheques.salida,
       chequesRechazados: cheques.rechazados,
       chequesSaldoFinal,
-      chequesAcreditado: cheques.acreditado,
     };
   });
 

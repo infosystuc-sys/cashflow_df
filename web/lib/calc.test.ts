@@ -8,6 +8,7 @@ import {
   fciMonth,
   chequesCarteraAntes,
   chequesMonth,
+  chequesResumen,
   buildCashflow,
 } from "./calc";
 import type { CashflowState, Cheque } from "./types";
@@ -29,6 +30,7 @@ function cheque(c: Partial<Cheque> & Pick<Cheque, "id" | "importe" | "fechaRecep
   return {
     cliente: "", numero: "", bancoEmisor: "", bancoDestino: "", fechaPago: "",
     fechaDeposito: "", fechaAcreditacion: "", fechaRechazo: "", fechaEndoso: "",
+    fechaCesion: "", endosadoA: "", movementId: null,
     ...c,
   };
 }
@@ -61,10 +63,12 @@ function makeFixture(): CashflowState {
       cheque({ id: "c1", importe: 400, fechaRecepcion: "2025-01-05", estado: "en_cartera" }),
       // Recibido ANTES del rango (2024-12), depositado en enero: prueba chequesCarteraAntes.
       cheque({ id: "c2", importe: 100, fechaRecepcion: "2024-12-20", estado: "depositado", fechaDeposito: "2025-01-10" }),
-      // Recibido y depositado en enero, acreditado en febrero (informativo).
-      cheque({ id: "c3", importe: 50, fechaRecepcion: "2025-01-02", estado: "acreditado", fechaDeposito: "2025-01-03", fechaAcreditacion: "2025-02-01" }),
+      // Recibido y depositado en enero (mismo mes que la salida).
+      cheque({ id: "c3", importe: 50, fechaRecepcion: "2025-01-02", estado: "depositado", fechaDeposito: "2025-01-03" }),
       // Recibido antes del rango, depositado en enero, rechazado (vuelve a cartera) en febrero.
       cheque({ id: "c4", importe: 70, fechaRecepcion: "2024-12-01", estado: "en_cartera", fechaDeposito: "2025-01-15", fechaRechazo: "2025-02-10" }),
+      // Recibido y cedido en enero: prueba la rama nueva de chequeEventos para "cesionado".
+      cheque({ id: "c5", importe: 30, fechaRecepcion: "2025-01-08", estado: "cesionado", fechaCesion: "2025-01-20" }),
     ],
   };
 }
@@ -124,15 +128,15 @@ describe("chequesCarteraAntes", () => {
 });
 
 describe("chequesMonth", () => {
-  it("calcula recibidos/salida/rechazados/acreditado para enero", () => {
-    // recibidos: c1 (400) + c3 (50) = 450
-    // salida: c2 (100, depositado 01-10) + c3 (50, depositado 01-03) + c4 (70, depositado 01-15) = 220
-    expect(chequesMonth(makeFixture(), "2025-01")).toEqual({ recibidos: 450, salida: 220, rechazados: 0, acreditado: 0 });
+  it("calcula recibidos/salida/rechazados para enero", () => {
+    // recibidos: c1 (400) + c3 (50) + c5 (30) = 480
+    // salida: c2 (100, depositado 01-10) + c3 (50, depositado 01-03) + c4 (70, depositado 01-15) + c5 (30, cedido 01-20) = 250
+    expect(chequesMonth(makeFixture(), "2025-01")).toEqual({ recibidos: 480, salida: 250, rechazados: 0 });
   });
 
-  it("calcula recibidos/salida/rechazados/acreditado para febrero", () => {
-    // rechazados: c4 vuelve a cartera (70). acreditado: c3 se confirma (50).
-    expect(chequesMonth(makeFixture(), "2025-02")).toEqual({ recibidos: 0, salida: 0, rechazados: 70, acreditado: 50 });
+  it("calcula recibidos/salida/rechazados para febrero", () => {
+    // rechazados: c4 vuelve a cartera (70).
+    expect(chequesMonth(makeFixture(), "2025-02")).toEqual({ recibidos: 0, salida: 0, rechazados: 70 });
   });
 });
 
@@ -155,11 +159,10 @@ describe("buildCashflow", () => {
     expect(jan.realIngresos).toBe(300);
     expect(jan.vsPresup).toBe(-700); // 300 - 1000
     expect(jan.chequesSaldoInicial).toBe(170); // c2 (100) + c4 (70), recibidos antes del rango
-    expect(jan.chequesRecibidos).toBe(450); // c1 (400) + c3 (50)
-    expect(jan.chequesSalida).toBe(220); // c2 (100) + c3 (50) + c4 (70)
+    expect(jan.chequesRecibidos).toBe(480); // c1 (400) + c3 (50) + c5 (30)
+    expect(jan.chequesSalida).toBe(250); // c2 (100) + c3 (50) + c4 (70) + c5 (30)
     expect(jan.chequesRechazados).toBe(0);
-    expect(jan.chequesSaldoFinal).toBe(400); // 170 + 450 - 220
-    expect(jan.chequesAcreditado).toBe(0);
+    expect(jan.chequesSaldoFinal).toBe(400); // 170 + 480 - 250
 
     const feb = cf.rows[1];
     expect(feb.saldoInicialBanco).toBe(1685);
@@ -172,7 +175,17 @@ describe("buildCashflow", () => {
     expect(feb.chequesSaldoInicial).toBe(400);
     expect(feb.chequesRechazados).toBe(70); // c4 vuelve a cartera
     expect(feb.chequesSaldoFinal).toBe(470); // 400 + 70 = c1 (400) + c4 (70) en cartera al final
-    expect(feb.chequesAcreditado).toBe(50); // c3 confirmado en febrero
+  });
+});
+
+describe("chequesResumen", () => {
+  it("totaliza en cartera, depositado, cedido y cantidad de rechazados", () => {
+    const r = chequesResumen(makeFixture());
+    // en_cartera: c1 (400) + c4 (70, vuelto a cartera por rechazo) = 470
+    // depositado: c2 (100) + c3 (50) = 150
+    // cesionado: c5 (30)
+    // rechazados: solo c4 está en_cartera con fechaRechazo cargado
+    expect(r).toEqual({ totalCartera: 470, totalDepositado: 150, totalCedido: 30, cantidadRechazados: 1 });
   });
 });
 
