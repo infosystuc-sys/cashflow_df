@@ -3,12 +3,12 @@ import { money } from "@/lib/format";
 export function ChequeSummaryCard({
   resumen,
 }: {
-  resumen: { totalCartera: number; totalDepositadoPendiente: number; acreditadoMes: number; cantidadRechazados: number };
+  resumen: { totalCartera: number; totalDepositado: number; totalCedido: number; cantidadRechazados: number };
 }) {
   const items: { k: string; v: string; cls?: string }[] = [
     { k: "En cartera", v: money(resumen.totalCartera) },
-    { k: "Depositado pendiente", v: money(resumen.totalDepositadoPendiente) },
-    { k: "Acreditado este mes", v: money(resumen.acreditadoMes), cls: "pos" },
+    { k: "Depositado", v: money(resumen.totalDepositado) },
+    { k: "Cedido", v: money(resumen.totalCedido), cls: "pos" },
     { k: "En cartera por rechazo", v: String(resumen.cantidadRechazados) },
   ];
 
