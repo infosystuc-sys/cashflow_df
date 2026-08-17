@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useCashflow } from "@/context/CashflowContext";
 import { bankRows, bankSummary } from "@/lib/calc";
 import { BANKS, GROUPS, TRANSFER_OWN_BANK_GROUP } from "@/lib/constants";
@@ -43,6 +43,8 @@ export default function MovimientosPage() {
   const [editing, setEditing] = useState<Movement | "new" | null>(null);
   const [confirm, setConfirm] = useState<Movement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const viewRef = useRef<HTMLDivElement>(null);
+  const stickyHeadRef = useRef<HTMLDivElement>(null);
   const [importErrors, setImportErrors] = useState<ImportRowError[] | null>(null);
   const [importReview, setImportReview] = useState<{ rows: ParsedRow[]; duplicateIds: (string | null)[]; skippedErrors: ImportRowError[] } | null>(null);
   const [importing, setImporting] = useState(false);
@@ -132,6 +134,22 @@ export default function MovimientosPage() {
     if (!state || !confirm || !confirm.transferId) return null;
     return state.movements.find((m) => m.transferId === confirm.transferId && m.id !== confirm.id) ?? null;
   }, [state, confirm]);
+
+  // Mide la altura real del bloque superior (título, pestañas, resumen, filtros) y la
+  // expone como variable CSS, para que el encabezado de la tabla sepa a qué altura
+  // pegarse debajo — la altura varía (ej. aparece/desaparece "Limpiar filtros").
+  useEffect(() => {
+    const el = stickyHeadRef.current;
+    const view = viewRef.current;
+    if (!el || !view) return;
+    const observer = new ResizeObserver(() => {
+      // offsetHeight (border-box, incluye el padding) — no contentRect, que excluye
+      // el padding y desalinearía el encabezado de la tabla respecto al borde real.
+      view.style.setProperty("--sticky-head-h", `${el.offsetHeight}px`);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [!!state]);
 
   if (!state || !summary) return null;
 
@@ -251,86 +269,88 @@ export default function MovimientosPage() {
   };
 
   return (
-    <div className="view">
-      <div className="view-head">
-        <div>
-          <h1>Movimientos</h1>
-          <p className="view-sub">Carga diaria por banco · se resumen automáticamente en el Cashflow por fecha de pago.</p>
-        </div>
-        <div className="view-head-actions">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".xlsx,.xls"
-            style={{ display: "none" }}
-            onChange={onImportFile}
-          />
-          <button className="btn btn--ghost" onClick={() => fileInputRef.current?.click()}>
-            ⭱ Importar desde Excel
-          </button>
-          <button className="btn btn--ghost" onClick={exportExcel}>⭳ Exportar a Excel</button>
-          <button className="btn btn--primary" onClick={() => setEditing("new")}>+ Nuevo movimiento</button>
-        </div>
-      </div>
-
-      <div className="bank-tabs">
-        {BANKS.map((bk) => (
-          <button
-            key={bk.id}
-            className={"bank-tab" + (bankId === bk.id ? " active" : "")}
-            style={{ "--bk": bk.color } as React.CSSProperties}
-            onClick={() => setBankId(bk.id)}
-          >
-            <span className="bank-dot"></span>{bk.name}
-            <span className="bank-count">{state.movements.filter((m) => m.bank === bk.id).length}</span>
-          </button>
-        ))}
-      </div>
-
-      <BankSummaryCard summary={viewSummary} bankId={bankId} />
-
-      <div className="mov-filters">
-        <div className="filt filt--search">
-          <span className="filt-label">Buscar</span>
-          <div className="filt-search-row">
-            <select className="inp" value={searchCol} onChange={(e) => setSearchCol(e.target.value as SearchCol)}>
-              {SEARCH_COLS.map((c) => (
-                <option key={c.id} value={c.id}>{c.label}</option>
-              ))}
-            </select>
+    <div className="view" ref={viewRef}>
+      <div className="sticky-head" ref={stickyHeadRef}>
+        <div className="view-head">
+          <div>
+            <h1>Movimientos</h1>
+            <p className="view-sub">Carga diaria por banco · se resumen automáticamente en el Cashflow por fecha de pago.</p>
+          </div>
+          <div className="view-head-actions">
             <input
-              className="inp"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Escribí un valor…"
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls"
+              style={{ display: "none" }}
+              onChange={onImportFile}
             />
+            <button className="btn btn--ghost" onClick={() => fileInputRef.current?.click()}>
+              ⭱ Importar desde Excel
+            </button>
+            <button className="btn btn--ghost" onClick={exportExcel}>⭳ Exportar a Excel</button>
+            <button className="btn btn--primary" onClick={() => setEditing("new")}>+ Nuevo movimiento</button>
           </div>
         </div>
-        <div className="filt">
-          <span className="filt-label">Agrupación</span>
-          <select className="inp" value={grupo} onChange={(e) => setGrupo(e.target.value)}>
-            <option value="todas">Todas</option>
-            {FILTER_GROUPS.map((g) => (
-              <option key={g} value={g}>{g}</option>
-            ))}
-          </select>
+
+        <div className="bank-tabs">
+          {BANKS.map((bk) => (
+            <button
+              key={bk.id}
+              className={"bank-tab" + (bankId === bk.id ? " active" : "")}
+              style={{ "--bk": bk.color } as React.CSSProperties}
+              onClick={() => setBankId(bk.id)}
+            >
+              <span className="bank-dot"></span>{bk.name}
+              <span className="bank-count">{state.movements.filter((m) => m.bank === bk.id).length}</span>
+            </button>
+          ))}
         </div>
-        <div className="filt">
-          <span className="filt-label">Mes</span>
-          <div className="filt-month">
-            <button className="month-nav" onClick={goPrev} disabled={!canPrev} aria-label="Mes anterior" title="Mes anterior">‹</button>
-            <select className="inp" value={selMonth} onChange={(e) => setMonthSel(e.target.value)}>
-              <option value="todos">Todos los meses</option>
-              {months.map((mk) => (
-                <option key={mk} value={mk}>{monthLabel(mk)}</option>
+
+        <BankSummaryCard summary={viewSummary} bankId={bankId} />
+
+        <div className="mov-filters">
+          <div className="filt filt--search">
+            <span className="filt-label">Buscar</span>
+            <div className="filt-search-row">
+              <select className="inp" value={searchCol} onChange={(e) => setSearchCol(e.target.value as SearchCol)}>
+                {SEARCH_COLS.map((c) => (
+                  <option key={c.id} value={c.id}>{c.label}</option>
+                ))}
+              </select>
+              <input
+                className="inp"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Escribí un valor…"
+              />
+            </div>
+          </div>
+          <div className="filt">
+            <span className="filt-label">Agrupación</span>
+            <select className="inp" value={grupo} onChange={(e) => setGrupo(e.target.value)}>
+              <option value="todas">Todas</option>
+              {FILTER_GROUPS.map((g) => (
+                <option key={g} value={g}>{g}</option>
               ))}
             </select>
-            <button className="month-nav" onClick={goNext} disabled={!canNext} aria-label="Mes siguiente" title="Mes siguiente">›</button>
           </div>
+          <div className="filt">
+            <span className="filt-label">Mes</span>
+            <div className="filt-month">
+              <button className="month-nav" onClick={goPrev} disabled={!canPrev} aria-label="Mes anterior" title="Mes anterior">‹</button>
+              <select className="inp" value={selMonth} onChange={(e) => setMonthSel(e.target.value)}>
+                <option value="todos">Todos los meses</option>
+                {months.map((mk) => (
+                  <option key={mk} value={mk}>{monthLabel(mk)}</option>
+                ))}
+              </select>
+              <button className="month-nav" onClick={goNext} disabled={!canNext} aria-label="Mes siguiente" title="Mes siguiente">›</button>
+            </div>
+          </div>
+          {hasFilters && (
+            <button className="btn btn--ghost filt-clear" onClick={clearFilters}>Limpiar filtros</button>
+          )}
         </div>
-        {hasFilters && (
-          <button className="btn btn--ghost filt-clear" onClick={clearFilters}>Limpiar filtros</button>
-        )}
       </div>
 
       {hasFilters && (
