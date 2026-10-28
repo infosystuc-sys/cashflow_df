@@ -1,9 +1,6 @@
-import type { Bank, ProjConcept } from "./types";
+import type { ProjConcept } from "./types";
 
-export const BANKS: Bank[] = [
-  { id: "galicia", name: "Banco Galicia", short: "Galicia", color: "var(--galicia)" },
-  { id: "nacion", name: "Banco Nación", short: "Nación", color: "var(--nacion)" },
-];
+// Los bancos y las empresas viven en la base (tablas banks y empresas).
 
 export const TRANSFER_OWN_BANK_GROUP = "Transferencia a banco propio";
 

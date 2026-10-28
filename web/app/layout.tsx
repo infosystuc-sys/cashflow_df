@@ -11,7 +11,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "CASHFLOW · Galicia · Nación",
+  title: "CASHFLOW · SAN · SAS",
 };
 
 export const viewport: Viewport = {

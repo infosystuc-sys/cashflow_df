@@ -24,7 +24,12 @@ export function Sidebar({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { state } = useCashflow();
+  const { state, db, vista, setVista } = useCashflow();
+  const vistas = [
+    { id: "all", label: "Todas", nombre: "Consolidado (todas las empresas)" },
+    ...(db?.empresas ?? []).map((e) => ({ id: e.id, label: e.codigo, nombre: e.nombre })),
+  ];
+  const vistaActual = vistas.find((v) => v.id === vista);
 
   let cierre = 0;
   if (state) {
@@ -42,7 +47,7 @@ export function Sidebar({
       <div className="brand">
         <div className="brand-txt">
           <strong>CASHFLOW</strong>
-          <span>Galicia · Nación</span>
+          <span>{db ? db.empresas.map((e) => e.codigo).join(" · ") : ""}</span>
         </div>
         <button
           className="collapse-btn"
@@ -52,6 +57,24 @@ export function Sidebar({
         >
           {collapsed ? "»" : "«"}
         </button>
+      </div>
+      <div className="vista">
+        <span className="vista-k">Empresa</span>
+        <div className="vista-opts" role="tablist" aria-label="Empresa">
+          {vistas.map((v) => (
+            <button
+              key={v.id}
+              role="tab"
+              aria-selected={vista === v.id}
+              className={"vista-opt" + (vista === v.id ? " active" : "")}
+              onClick={() => setVista(v.id)}
+              title={v.nombre}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
+        {vistaActual && <span className="vista-name">{vistaActual.nombre}</span>}
       </div>
       <nav className="nav">
         {NAV.map((n) => (
@@ -70,7 +93,7 @@ export function Sidebar({
         ))}
       </nav>
       <div className="sidebar-foot">
-        <span className="foot-k">Cierre Banco + FCI</span>
+        <span className="foot-k">Cierre Banco + FCI{vistaActual && vista !== "all" ? ` · ${vistaActual.label}` : ""}</span>
         <span className="foot-v">{money(cierre, false)}</span>
       </div>
     </aside>

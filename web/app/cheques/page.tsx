@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { useCashflow } from "@/context/CashflowContext";
 import { chequesResumen } from "@/lib/calc";
 import { money } from "@/lib/format";
-import { BANKS } from "@/lib/constants";
 import { downloadXlsx, exDate, type Cell } from "@/lib/export";
 import type { BankId, Cheque, ChequeEstado, Movement } from "@/lib/types";
 import { Money, Confirm } from "@/components/ui";
@@ -49,12 +48,8 @@ function fmtDate(iso: string) {
   return `${d}/${m}/${y}`;
 }
 
-function bancoNombre(id: string) {
-  return BANKS.find((b) => b.id === id)?.short || "";
-}
-
 export default function ChequesPage() {
-  const { state, addCheque, updateCheque, deleteCheque, addMovement, updateMovement, deleteMovement } = useCashflow();
+  const { state, db, vista, addCheque, updateCheque, deleteCheque, addMovement, updateMovement, deleteMovement } = useCashflow();
   const [filtro, setFiltro] = useState<ChequeEstado | "todos">("todos");
   const [editing, setEditing] = useState<Cheque | "new" | null>(null);
   const [accion, setAccion] = useState<{ cheque: Cheque; accion: Accion } | null>(null);
@@ -68,14 +63,18 @@ export default function ChequesPage() {
     return [...filtered].sort((a, b) => (a.fechaRecepcion < b.fechaRecepcion ? -1 : a.fechaRecepcion > b.fechaRecepcion ? 1 : 0));
   }, [state, filtro]);
 
-  if (!state || !resumen) return null;
+  if (!state || !db || !resumen) return null;
+
+  const bancoNombre = (id: string) => db.banks.find((b) => b.id === id)?.label || "";
+  const empresaCodigo = (id: string) => db.empresas.find((e) => e.id === id)?.codigo || "";
+  const consolidado = vista === "all";
 
   const saveCheque = async (c: Cheque | Omit<Cheque, "id">) => {
     try {
       if ("id" in c) {
         await updateCheque(c);
         if (c.movementId) {
-          const mv = state.movements.find((m) => m.id === c.movementId);
+          const mv = db.movements.find((m) => m.id === c.movementId);
           if (mv) {
             await updateMovement({
               ...mv,
@@ -144,11 +143,11 @@ export default function ChequesPage() {
   };
 
   const exportExcel = () => {
-    const header: Cell[] = ["Cliente", "N° cheque", "Banco emisor", "Banco destino", "Importe", "F. recepción", "F. pago", "Estado", "F. depósito", "F. rechazo", "F. endoso", "Endosado a", "F. cesión"];
+    const header: Cell[] = ["Empresa", "Cliente", "N° cheque", "Banco emisor", "Banco destino", "Importe", "F. recepción", "F. pago", "Estado", "F. depósito", "F. rechazo", "F. endoso", "Endosado a", "F. cesión"];
     const aoa: Cell[][] = [header];
     rows.forEach((c) => {
       aoa.push([
-        c.cliente, c.numero, c.bancoEmisor, bancoNombre(c.bancoDestino), c.importe,
+        empresaCodigo(c.empresaId), c.cliente, c.numero, c.bancoEmisor, bancoNombre(c.bancoDestino), c.importe,
         exDate(c.fechaRecepcion), exDate(c.fechaPago), ESTADO_LABEL[c.estado],
         exDate(c.fechaDeposito), exDate(c.fechaRechazo), exDate(c.fechaEndoso), c.endosadoA, exDate(c.fechaCesion),
       ]);
@@ -191,6 +190,7 @@ export default function ChequesPage() {
         <table className="grid mov-table">
           <thead>
             <tr>
+              {consolidado && <th className="c-chk">Empresa</th>}
               <th className="c-prov">Cliente</th>
               <th className="c-chk">N° cheque</th>
               <th className="c-desc">Banco emisor</th>
@@ -206,6 +206,7 @@ export default function ChequesPage() {
           <tbody>
             {rows.map((c) => (
               <tr key={c.id} className="row">
+                {consolidado && <td className="c-chk">{empresaCodigo(c.empresaId)}</td>}
                 <td className="c-prov">{c.cliente}</td>
                 <td className="c-chk">{c.numero}</td>
                 <td className="c-desc">{c.bancoEmisor}</td>
@@ -251,6 +252,7 @@ export default function ChequesPage() {
         <ChequeActionModal
           {...ACCION_CFG[accion.accion]}
           extra={accionExtra}
+          banks={db.banks.filter((b) => b.empresaId === accion.cheque.empresaId && b.activo)}
           onConfirm={confirmAccion}
           onClose={() => setAccion(null)}
         />

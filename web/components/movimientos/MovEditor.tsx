@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { Modal, Field, MoneyInput } from "@/components/ui";
-import { BANKS, GROUPS, TRANSFER_OWN_BANK_GROUP } from "@/lib/constants";
+import { useCashflow } from "@/context/CashflowContext";
+import { GROUPS, TRANSFER_OWN_BANK_GROUP } from "@/lib/constants";
 import { money } from "@/lib/format";
-import type { BankId, Movement } from "@/lib/types";
+import type { Bank, Movement } from "@/lib/types";
 
 type MovForm = {
   descripcion: string;
@@ -35,14 +36,14 @@ function fmtDate(iso: string) {
 }
 
 export function MovEditor({
-  bankId,
+  bank,
   initial,
   linkedBankName,
   onSave,
   onSaveTransfer,
   onClose,
 }: {
-  bankId: BankId;
+  bank: Bank;
   initial: Movement | null;
   linkedBankName?: string;
   onSave: (mov: Movement | Omit<Movement, "id">) => void;
@@ -53,8 +54,15 @@ export function MovEditor({
   const [confirmingTransfer, setConfirmingTransfer] = useState(false);
   const set = <K extends keyof MovForm>(k: K, v: MovForm[K]) => setF((p) => ({ ...p, [k]: v }));
   const isIn = ["Ingresos", "Ingreso por Venta de USD", "Rescates"].includes(f.grupo);
-  const bank = BANKS.find((b) => b.id === bankId)!;
-  const otherBank = BANKS.find((b) => b.id !== bankId)!;
+  const bankId = bank.id;
+  const { db } = useCashflow();
+  // Destino de una transferencia a banco propio: cualquier banco activo, de
+  // cualquiera de las dos empresas (entre empresas, en el consolidado se anula).
+  const destinos = (db?.banks ?? []).filter((b) => b.activo && b.id !== bankId);
+  const [otherBankId, setOtherBankId] = useState(
+    () => (destinos.find((b) => b.empresaId === bank.empresaId) ?? destinos[0])?.id ?? ""
+  );
+  const otherBank = destinos.find((b) => b.id === otherBankId);
   const isLinkedEdit = !!(initial && linkedBankName);
   const isNewTransfer = !initial && f.grupo === TRANSFER_OWN_BANK_GROUP;
 
@@ -73,12 +81,17 @@ export function MovEditor({
   const save = () => {
     if (!validate()) return;
 
+    if (isNewTransfer && !otherBank) {
+      alert("Elegí el banco destino de la transferencia.");
+      return;
+    }
+
     if (isNewTransfer && !confirmingTransfer) {
       setConfirmingTransfer(true);
       return;
     }
 
-    if (isNewTransfer && confirmingTransfer) {
+    if (isNewTransfer && confirmingTransfer && otherBank) {
       const transferId = crypto.randomUUID();
       const legA: Omit<Movement, "id"> = { ...f, bank: bankId, transferId };
       const legB: Omit<Movement, "id"> = {
@@ -101,7 +114,7 @@ export function MovEditor({
 
   return (
     <Modal
-      title={(initial ? "Editar" : "Nuevo") + " movimiento · " + bank.short}
+      title={(initial ? "Editar" : "Nuevo") + " movimiento · " + bank.label}
       width={640}
       onClose={onClose}
       footer={
@@ -121,12 +134,12 @@ export function MovEditor({
       {confirmingTransfer ? (
         <div className="transfer-preview">
           <p>
-            Se registrará en <strong>{bank.name}</strong>:{" "}
+            Se registrará en <strong>{bank.label}</strong>:{" "}
             {f.credito ? `crédito de ${money(f.credito)}` : `débito de ${money(f.debito)}`} el{" "}
             {fmtDate(f.fechaPago)} — {f.descripcion}.
           </p>
           <p>
-            Se creará automáticamente en <strong>{otherBank.name}</strong>:{" "}
+            Se creará automáticamente en <strong>{otherBank?.label}</strong>:{" "}
             {f.credito ? `débito de ${money(f.credito)}` : `crédito de ${money(f.debito)}`} el{" "}
             {fmtDate(f.fechaPago)} — {f.descripcion}.
           </p>
@@ -147,6 +160,15 @@ export function MovEditor({
                 ))}
               </select>
             </Field>
+            {isNewTransfer && (
+              <Field label="Banco destino" wide>
+                <select className="inp" value={otherBankId} onChange={(e) => setOtherBankId(e.target.value)}>
+                  {destinos.map((b) => (
+                    <option key={b.id} value={b.id}>{b.label}</option>
+                  ))}
+                </select>
+              </Field>
+            )}
             <Field label="Fecha de emisión">
               <input className="inp" type="date" value={f.fechaEmision} onChange={(e) => set("fechaEmision", e.target.value)} />
             </Field>

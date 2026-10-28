@@ -1,9 +1,7 @@
-import { BANKS } from "@/lib/constants";
 import { money } from "@/lib/format";
-import type { BankId, BankSummary } from "@/lib/types";
+import type { Bank, BankSummary } from "@/lib/types";
 
-export function BankSummaryCard({ summary, bankId }: { summary: BankSummary; bankId: BankId }) {
-  const b = BANKS.find((x) => x.id === bankId)!;
+export function BankSummaryCard({ summary, bank: b }: { summary: BankSummary; bank: Bank }) {
   const items: { k: string; v: number; cls?: string }[] = [
     { k: "Saldo Inicial", v: summary.inicial },
     { k: "Ingresos", v: summary.ingresos, cls: "pos" },

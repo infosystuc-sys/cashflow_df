@@ -13,6 +13,7 @@ import {
 } from "./calc";
 import type { CashflowState, Cheque } from "./types";
 import { PROJ_CONCEPTS, IVA_ROWS } from "./constants";
+import { seedBanks } from "./seed";
 
 function emptyProjection() {
   const p: CashflowState["projection"] = {};
@@ -28,7 +29,7 @@ function emptyIva() {
 
 function cheque(c: Partial<Cheque> & Pick<Cheque, "id" | "importe" | "fechaRecepcion" | "estado">): Cheque {
   return {
-    cliente: "", numero: "", bancoEmisor: "", bancoDestino: "", fechaPago: "",
+    empresaId: "san", cliente: "", numero: "", bancoEmisor: "", bancoDestino: "", fechaPago: "",
     fechaDeposito: "", fechaAcreditacion: "", fechaRechazo: "", fechaEndoso: "",
     fechaCesion: "", endosadoA: "", movementId: null,
     ...c,
@@ -44,6 +45,7 @@ function cheque(c: Partial<Cheque> & Pick<Cheque, "id" | "importe" | "fechaRecep
 // - Cheques: ver comentario en describe("chequesMonth") para el detalle de cada uno.
 function makeFixture(): CashflowState {
   return {
+    banks: seedBanks(),
     settings: {
       saldoInicial: { galicia: 1000, nacion: 500 },
       rangeStart: "2025-01",
@@ -191,6 +193,7 @@ describe("chequesResumen", () => {
 
 function makeTransferFixture(): CashflowState {
   return {
+    banks: seedBanks(),
     settings: { saldoInicial: { galicia: 0, nacion: 0 }, rangeStart: "2025-01", rangeEnd: "2025-01" },
     movements: [
       { id: "t1", bank: "galicia", descripcion: "Transferencia interna", proveedor: "", fechaEmision: "", fechaPago: "2025-01-05", cheque: "", credito: 0, debito: 500, grupo: "Transferencia a banco propio", transferId: "tr-1" },
@@ -225,6 +228,7 @@ describe("realMonth — Transferencia a banco propio", () => {
     // isolates whether realMonth's transf bucket picks up this grupo at all —
     // a balanced pair would net to 0 either way and wouldn't catch a missing merge.
     const state: CashflowState = {
+      banks: seedBanks(),
       settings: { saldoInicial: { galicia: 0, nacion: 0 }, rangeStart: "2025-01", rangeEnd: "2025-01" },
       movements: [
         { id: "t1", bank: "galicia", descripcion: "Transferencia interna", proveedor: "", fechaEmision: "", fechaPago: "2025-01-05", cheque: "", credito: 500, debito: 0, grupo: "Transferencia a banco propio" },
