@@ -50,11 +50,11 @@ h1,h3{margin:0;}
 /* Selector de empresa (vista) */
 .vista{display:flex;flex-direction:column;gap:6px;margin:0 0 14px;}
 .vista-k{font-size:11px;color:#8290a4;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:0 2px;}
-.vista-opts{display:flex;gap:4px;background:rgba(255,255,255,.06);border-radius:9px;padding:3px;}
-.vista-opt{flex:1;border:0;background:transparent;color:#a9b4c5;padding:7px 4px;border-radius:7px;font-size:12.5px;font-weight:700;letter-spacing:.02em;transition:.12s;}
-.vista-opt:hover{color:#fff;}
+.vista-opts{display:flex;flex-direction:column;gap:3px;background:rgba(255,255,255,.06);border-radius:9px;padding:3px;}
+.vista-opt{border:0;background:transparent;color:#a9b4c5;padding:8px 11px;border-radius:7px;font-size:13px;font-weight:700;text-align:left;transition:.12s;}
+.vista-opt:hover{color:#fff;background:rgba(255,255,255,.06);}
 .vista-opt.active{background:#fff;color:var(--ink);}
-.vista-name{font-size:12px;color:#c3ccd9;padding:0 2px;}
+.vista-opt-code{display:none;}
 .nav-item{
   display:flex;align-items:center;gap:11px;border:0;background:transparent;
   color:#a9b4c5;padding:10px 12px;border-radius:9px;font-size:14px;font-weight:600;
@@ -82,8 +82,9 @@ h1,h3{margin:0;}
 .app.collapsed .nav-ico{font-size:17px;}
 .app.collapsed .sidebar-foot{padding:10px 4px;text-align:center;}
 .app.collapsed .foot-k{display:none;}
-.app.collapsed .vista-k,.app.collapsed .vista-name{display:none;}
-.app.collapsed .vista-opts{flex-direction:column;}
+.app.collapsed .vista-k,.app.collapsed .vista-opt-name{display:none;}
+.app.collapsed .vista-opt-code{display:inline;}
+.app.collapsed .vista-opt{text-align:center;padding:8px 2px;font-size:12px;}
 .app.collapsed .foot-v{font-size:11px;letter-spacing:-.02em;}
 
 .main{flex:1;overflow:auto;padding:26px 30px 60px;}
@@ -405,11 +406,16 @@ select.inp{cursor:pointer;}
   .app.collapsed .nav-label,
   .app.collapsed .foot-k,
   .app.collapsed .vista-k,
-  .app.collapsed .vista-name {
+  .app.collapsed .vista-opt-name {
     display: block;
   }
-  .app.collapsed .vista-opts {
-    flex-direction: row;
+  .app.collapsed .vista-opt-code {
+    display: none;
+  }
+  .app.collapsed .vista-opt {
+    text-align: left;
+    padding: 8px 11px;
+    font-size: 13px;
   }
   .app.collapsed .nav-item {
     justify-content: flex-start;
