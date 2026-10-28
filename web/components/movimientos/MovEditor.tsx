@@ -56,6 +56,7 @@ export function MovEditor({
   const isIn = ["Ingresos", "Ingreso por Venta de USD", "Rescates"].includes(f.grupo);
   const bankId = bank.id;
   const { db } = useCashflow();
+  const empresaNombre = db?.empresas.find((e) => e.id === bank.empresaId)?.nombre ?? "";
   // Destino de una transferencia a banco propio: cualquier banco activo, de
   // cualquiera de las dos empresas (entre empresas, en el consolidado se anula).
   const destinos = (db?.banks ?? []).filter((b) => b.activo && b.id !== bankId);
@@ -114,7 +115,7 @@ export function MovEditor({
 
   return (
     <Modal
-      title={(initial ? "Editar" : "Nuevo") + " movimiento · " + bank.label}
+      title={(initial ? "Editar" : "Nuevo") + " movimiento · " + bank.label + (empresaNombre ? " · " + empresaNombre : "")}
       width={640}
       onClose={onClose}
       footer={

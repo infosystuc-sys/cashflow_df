@@ -41,6 +41,7 @@ export function ChequeEditor({
   const [f, setF] = useState<ChequeForm>(
     initial ? { ...initial } : { ...BLANK, empresaId: vista !== "all" ? vista : empresas[0]?.id ?? "" }
   );
+  const empresaNombre = empresas.find((e) => e.id === f.empresaId)?.nombre ?? "";
   const bancos = (db?.banks ?? []).filter((b) => b.empresaId === f.empresaId && (b.activo || b.id === f.bancoDestino));
   const set = <K extends keyof ChequeForm>(k: K, v: ChequeForm[K]) => setF((p) => ({ ...p, [k]: v }));
 
@@ -72,7 +73,7 @@ export function ChequeEditor({
 
   return (
     <Modal
-      title={(initial ? "Editar" : "Nuevo") + " cheque"}
+      title={(initial ? "Editar" : "Nuevo") + " cheque" + (empresaNombre ? " · " + empresaNombre : "")}
       width={640}
       onClose={onClose}
       footer={
