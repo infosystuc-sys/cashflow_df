@@ -25,9 +25,10 @@ export function Sidebar({
   const router = useRouter();
   const pathname = usePathname();
   const { state, db, vista, setVista } = useCashflow();
+  // label: código corto (se usa con el menú replegado y en el pie); nombre: lo que se lee en el selector.
   const vistas = [
-    { id: "all", label: "Todas", nombre: "Consolidado (todas las empresas)" },
     ...(db?.empresas ?? []).map((e) => ({ id: e.id, label: e.codigo, nombre: e.nombre })),
+    { id: "all", label: "Todas", nombre: "Todas" },
   ];
   const vistaActual = vistas.find((v) => v.id === vista);
 
@@ -68,13 +69,13 @@ export function Sidebar({
               aria-selected={vista === v.id}
               className={"vista-opt" + (vista === v.id ? " active" : "")}
               onClick={() => setVista(v.id)}
-              title={v.nombre}
+              title={v.id === "all" ? "Todas las empresas (consolidado)" : v.nombre}
             >
-              {v.label}
+              <span className="vista-opt-name">{v.nombre}</span>
+              <span className="vista-opt-code">{v.label}</span>
             </button>
           ))}
         </div>
-        {vistaActual && <span className="vista-name">{vistaActual.nombre}</span>}
       </div>
       <nav className="nav">
         {NAV.map((n) => (
