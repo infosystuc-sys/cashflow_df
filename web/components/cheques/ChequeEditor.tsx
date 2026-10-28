@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { Modal, Field, MoneyInput } from "@/components/ui";
-import { BANKS } from "@/lib/constants";
+import { useCashflow } from "@/context/CashflowContext";
 import type { Cheque } from "@/lib/types";
 
 type ChequeForm = {
+  empresaId: string;
   cliente: string;
   numero: string;
   bancoEmisor: string;
@@ -15,7 +16,7 @@ type ChequeForm = {
   fechaPago: string;
 };
 
-const BLANK: ChequeForm = {
+const BLANK: Omit<ChequeForm, "empresaId"> = {
   cliente: "",
   numero: "",
   bancoEmisor: "",
@@ -34,7 +35,13 @@ export function ChequeEditor({
   onSave: (cheque: Cheque | Omit<Cheque, "id">) => void;
   onClose: () => void;
 }) {
-  const [f, setF] = useState<ChequeForm>(initial ? { ...initial } : { ...BLANK });
+  const { db, vista } = useCashflow();
+  const empresas = db?.empresas ?? [];
+  // Nuevo cheque: es de la empresa de la vista; en el consolidado se elige.
+  const [f, setF] = useState<ChequeForm>(
+    initial ? { ...initial } : { ...BLANK, empresaId: vista !== "all" ? vista : empresas[0]?.id ?? "" }
+  );
+  const bancos = (db?.banks ?? []).filter((b) => b.empresaId === f.empresaId && (b.activo || b.id === f.bancoDestino));
   const set = <K extends keyof ChequeForm>(k: K, v: ChequeForm[K]) => setF((p) => ({ ...p, [k]: v }));
 
   const save = () => {
@@ -76,6 +83,19 @@ export function ChequeEditor({
       }
     >
       <div className="form-grid">
+        {!initial && vista === "all" && (
+          <Field label="Empresa" wide>
+            <select
+              className="inp"
+              value={f.empresaId}
+              onChange={(e) => setF((p) => ({ ...p, empresaId: e.target.value, bancoDestino: "" }))}
+            >
+              {empresas.map((e) => (
+                <option key={e.id} value={e.id}>{e.codigo} – {e.nombre}</option>
+              ))}
+            </select>
+          </Field>
+        )}
         <Field label="Cliente / librador" wide>
           <input className="inp" autoFocus value={f.cliente} onChange={(e) => set("cliente", e.target.value)} placeholder="Ej: AGD" />
         </Field>
@@ -88,8 +108,8 @@ export function ChequeEditor({
         <Field label="Banco propio destino">
           <select className="inp" value={f.bancoDestino} onChange={(e) => set("bancoDestino", e.target.value as Cheque["bancoDestino"])}>
             <option value="">Sin definir</option>
-            {BANKS.map((b) => (
-              <option key={b.id} value={b.id}>{b.name}</option>
+            {bancos.map((b) => (
+              <option key={b.id} value={b.id}>{b.label}</option>
             ))}
           </select>
         </Field>

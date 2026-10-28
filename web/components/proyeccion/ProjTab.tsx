@@ -10,7 +10,7 @@ import { Money } from "@/components/ui";
 import { MatrixShell } from "./MatrixShell";
 import { CellQPEditor } from "./CellQPEditor";
 
-export function ProjTab({ state, months }: { state: CashflowState; months: string[] }) {
+export function ProjTab({ state, months, readOnly }: { state: CashflowState; months: string[]; readOnly?: boolean }) {
   const { setProjectionCell, clearProjectionCell } = useCashflow();
   const [edit, setEdit] = useState<{ conceptId: string; monthKey: string } | null>(null);
   const concept = edit ? PROJ_CONCEPTS.find((c) => c.id === edit.conceptId) ?? null : null;
@@ -43,8 +43,8 @@ export function ProjTab({ state, months }: { state: CashflowState; months: strin
             const t = projTotal(state, c.id, mk);
             const cell = state.projection[c.id][mk];
             return (
-              <td key={mk} className={"c-cell" + (t ? " has" : "")} onClick={() => setEdit({ conceptId: c.id, monthKey: mk })}>
-                {t ? <span className="cell-amt">{money(t, false)}</span> : <span className="cell-add">+</span>}
+              <td key={mk} className={"c-cell" + (t ? " has" : "")} onClick={readOnly ? undefined : () => setEdit({ conceptId: c.id, monthKey: mk })}>
+                {t ? <span className="cell-amt">{money(t, false)}</span> : readOnly ? null : <span className="cell-add">+</span>}
                 {cell && c.tipo === "unidad" && (
                   <span className="cell-sub">{num(cell.cantidad)}×{money(cell.precio, false)}</span>
                 )}

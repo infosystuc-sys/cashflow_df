@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { Modal, Field } from "@/components/ui";
-import { BANKS } from "@/lib/constants";
-import type { BankId } from "@/lib/types";
+import type { Bank, BankId } from "@/lib/types";
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
@@ -18,6 +17,7 @@ export function ChequeActionModal({
   dateLabel,
   confirmLabel,
   extra,
+  banks,
   onConfirm,
   onClose,
 }: {
@@ -25,6 +25,7 @@ export function ChequeActionModal({
   dateLabel: string;
   confirmLabel: string;
   extra?: ChequeActionExtra;
+  banks: Bank[]; // bancos propios elegibles (los de la empresa del cheque)
   onConfirm: (fecha: string, extraValue: string) => void;
   onClose: () => void;
 }) {
@@ -52,8 +53,8 @@ export function ChequeActionModal({
         <Field label={extra.label} wide>
           <select className="inp" value={extraValue} onChange={(e) => setExtraValue(e.target.value)}>
             <option value="">Elegir banco…</option>
-            {BANKS.map((b) => (
-              <option key={b.id} value={b.id}>{b.name}</option>
+            {banks.map((b) => (
+              <option key={b.id} value={b.id}>{b.label}</option>
             ))}
           </select>
         </Field>

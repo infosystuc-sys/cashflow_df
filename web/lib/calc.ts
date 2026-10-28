@@ -59,7 +59,7 @@ export function projMonthTotal(state: CashflowState, monthKey: string): number {
   return PROJ_CONCEPTS.reduce((a, c) => a + projTotal(state, c.id, monthKey), 0);
 }
 
-// Real por mes (de movimientos, ambos bancos), bucketed por fechaPago
+// Real por mes (de movimientos de todos los bancos de la vista), bucketed por fechaPago
 export function realMonth(state: CashflowState, monthKey: string) {
   const inMonth = state.movements.filter((x) => monthKeyFromISO(x.fechaPago) === monthKey);
   const sum = (pred: (r: CashflowState["movements"][number]) => boolean, field: "credito" | "debito") =>
@@ -132,7 +132,7 @@ export function chequesMonth(state: CashflowState, monthKey: string) {
 // Construye la matriz completa del cashflow para el rango de meses configurado
 export function buildCashflow(state: CashflowState): CashflowResult {
   const months = monthRange(state.settings.rangeStart, state.settings.rangeEnd);
-  const bankInicialTotal = (state.settings.saldoInicial.galicia || 0) + (state.settings.saldoInicial.nacion || 0);
+  const bankInicialTotal = state.banks.reduce((a, b) => a + (state.settings.saldoInicial[b.id] || 0), 0);
   let saldoBancoPrev = bankInicialTotal;
   let saldoFciPrev = state.fci.saldoInicial || 0;
   let saldoChequesPrev = months.length ? chequesCarteraAntes(state, months[0]) : 0;

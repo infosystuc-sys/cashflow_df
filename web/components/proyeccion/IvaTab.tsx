@@ -10,7 +10,7 @@ import { Money } from "@/components/ui";
 import { MatrixShell } from "./MatrixShell";
 import { CellMoneyEditor } from "./CellMoneyEditor";
 
-export function IvaTab({ state, months }: { state: CashflowState; months: string[] }) {
+export function IvaTab({ state, months, readOnly }: { state: CashflowState; months: string[]; readOnly?: boolean }) {
   const { setIvaCell } = useCashflow();
   const [edit, setEdit] = useState<{ row: string; monthKey: string } | null>(null);
 
@@ -32,8 +32,8 @@ export function IvaTab({ state, months }: { state: CashflowState; months: string
           {months.map((mk) => {
             const v = state.iva[r]?.[mk] || 0;
             return (
-              <td key={mk} className={"c-cell" + (v ? " has" : "")} onClick={() => setEdit({ row: r, monthKey: mk })}>
-                {v ? <span className="cell-amt">{money(v, false)}</span> : <span className="cell-add">+</span>}
+              <td key={mk} className={"c-cell" + (v ? " has" : "")} onClick={readOnly ? undefined : () => setEdit({ row: r, monthKey: mk })}>
+                {v ? <span className="cell-amt">{money(v, false)}</span> : readOnly ? null : <span className="cell-add">+</span>}
               </td>
             );
           })}

@@ -1,7 +1,14 @@
-import type { Cheque, CashflowState, FciData, IvaData, Movement, ProjectionMap, Settings } from "./types";
+import type { Bank, Cheque, CashflowState, FciData, IvaData, Movement, ProjectionMap, Settings } from "./types";
 import { IVA_ROWS, PROJ_CONCEPTS } from "./constants";
 
 export type SeedMovement = Omit<Movement, "id">;
+
+export function seedBanks(): Bank[] {
+  return [
+    { id: "galicia", empresaId: "san", name: "Banco Galicia", short: "Galicia", label: "SAN Galicia", color: "#e87613", saldoInicial: 50000000, orden: 1, activo: true },
+    { id: "nacion", empresaId: "san", name: "Banco Nación", short: "Nación", label: "SAN Nación", color: "#1f7fc4", saldoInicial: 15742577.77, orden: 2, activo: true },
+  ];
+}
 
 export function seedSettings(): Settings {
   return {
@@ -118,7 +125,7 @@ export function seedCheques(): SeedCheque[] {
     endosadoA = "",
     movementId: string | null = null
   ): SeedCheque => ({
-    cliente, numero, bancoEmisor, bancoDestino, importe, fechaRecepcion, fechaPago, estado,
+    empresaId: "san", cliente, numero, bancoEmisor, bancoDestino, importe, fechaRecepcion, fechaPago, estado,
     fechaDeposito, fechaAcreditacion, fechaRechazo, fechaEndoso, fechaCesion, endosadoA, movementId,
   });
 
@@ -129,11 +136,10 @@ export function seedCheques(): SeedCheque[] {
   ];
 }
 
-// Full in-memory state for tests and for the "reset to demo data" flow.
-// Movements/cheques get synthetic ids here; resetToSeed() (Task 8) inserts them
-// directly so Postgres assigns real uuids.
+// Estado en memoria (una sola empresa) para los tests.
 export function seedState(): CashflowState {
   return {
+    banks: seedBanks(),
     settings: seedSettings(),
     movements: seedMovements().map((m, i) => ({ ...m, id: `seed-${i}` })),
     projection: seedProjection(),

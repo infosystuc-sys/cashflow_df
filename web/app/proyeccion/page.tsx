@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useCashflow } from "@/context/CashflowContext";
+import { useCashflow, useVistaLabel } from "@/context/CashflowContext";
 import { monthRange, monthLabel } from "@/lib/dates";
 import { projTotal, projMonthTotal } from "@/lib/calc";
 import { PROJ_CONCEPTS, IVA_ROWS } from "@/lib/constants";
@@ -19,7 +19,10 @@ const TABS = [
 type TabId = (typeof TABS)[number]["id"];
 
 export default function ProyeccionPage() {
-  const { state } = useCashflow();
+  const { state, vista } = useCashflow();
+  const vistaLabel = useVistaLabel();
+  // Se carga por empresa; el consolidado solo muestra la suma.
+  const readOnly = vista === "all";
   const [tab, setTab] = useState<TabId>("proj");
 
   const months = useMemo(
@@ -66,7 +69,7 @@ export default function ProyeccionPage() {
     const ivaCol = months.map((mk) => IVA_ROWS.reduce((a, r) => a + (st.iva[r]?.[mk] || 0), 0));
     iva.push(["S/ Libro IVA Ventas", sum(ivaCol), ...ivaCol]);
 
-    downloadXlsx("Proyeccion", [
+    downloadXlsx(`Proyeccion_${vistaLabel.short}`, [
       { name: "Ingresos proyectados", aoa: proj },
       { name: "FCI Inversiones", aoa: fci },
       { name: "Ventas netas IVA", aoa: iva },
@@ -77,8 +80,12 @@ export default function ProyeccionPage() {
     <div className="view">
       <div className="view-head">
         <div>
-          <h1>Proyección</h1>
-          <p className="view-sub">Tocá cualquier celda para cargar valores. Los totales alimentan el Cashflow.</p>
+          <h1>Proyección · {vistaLabel.label}</h1>
+          <p className="view-sub">
+            {readOnly
+              ? "Vista consolidada: suma de todas las empresas, solo lectura. Elegí una empresa en el menú para cargar valores."
+              : "Tocá cualquier celda para cargar valores. Los totales alimentan el Cashflow."}
+          </p>
         </div>
         <div className="view-head-actions">
           <button className="btn btn--ghost" onClick={exportExcel}>⭳ Exportar a Excel</button>
@@ -91,9 +98,9 @@ export default function ProyeccionPage() {
           </button>
         ))}
       </div>
-      {tab === "proj" && <ProjTab state={state} months={months} />}
-      {tab === "fci" && <FciTab state={state} months={months} />}
-      {tab === "iva" && <IvaTab state={state} months={months} />}
+      {tab === "proj" && <ProjTab state={state} months={months} readOnly={readOnly} />}
+      {tab === "fci" && <FciTab state={state} months={months} readOnly={readOnly} />}
+      {tab === "iva" && <IvaTab state={state} months={months} readOnly={readOnly} />}
     </div>
   );
 }

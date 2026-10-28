@@ -2,7 +2,7 @@
 
 import { Modal } from "@/components/ui";
 import { money } from "@/lib/format";
-import { BANKS } from "@/lib/constants";
+import { useCashflow } from "@/context/CashflowContext";
 import type { Movement } from "@/lib/types";
 
 export type DrillMode = "credito" | "debito" | "neto";
@@ -11,10 +11,6 @@ function fmtDate(iso: string) {
   if (!iso) return "";
   const [y, m, d] = iso.split("-");
   return `${d}/${m}/${y}`;
-}
-
-function bankShort(id: string) {
-  return BANKS.find((b) => b.id === id)?.short || id;
 }
 
 export function CellDetailModal({
@@ -28,6 +24,8 @@ export function CellDetailModal({
   mode: DrillMode;
   onClose: () => void;
 }) {
+  const { db } = useCashflow();
+  const bankShort = (id: string) => db?.banks.find((b) => b.id === id)?.label || id;
   const amount = (m: Movement) =>
     mode === "debito" ? m.debito : mode === "neto" ? m.credito - m.debito : m.credito;
   const rows = [...movements].sort((a, b) => (a.fechaPago < b.fechaPago ? -1 : a.fechaPago > b.fechaPago ? 1 : 0));

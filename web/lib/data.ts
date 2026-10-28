@@ -1,7 +1,6 @@
 import { supabase } from "./supabase";
-import { seedCheques, seedFci, seedIva, seedMovements, seedProjection, seedSettings } from "./seed";
 import { IVA_ROWS, PROJ_CONCEPTS } from "./constants";
-import type { BankId, CashflowState, Cheque, Movement } from "./types";
+import type { Bank, BankId, Cheque, DbState, Empresa, EmpresaId, Movement } from "./types";
 
 type MovementRow = {
   id: string;
@@ -31,57 +30,72 @@ async function fetchAllRows<T>(table: string): Promise<T[]> {
   return all;
 }
 
-export async function fetchAllData(): Promise<CashflowState> {
-  const [settingsRes, movementsRows, projectionRes, fciRes, ivaRes, chequesRes] = await Promise.all([
-    supabase.from("settings").select("*").eq("id", 1).single(),
-    fetchAllRows<MovementRow>("movements"),
-    supabase.from("projection_cells").select("*"),
-    supabase.from("fci_monthly").select("*"),
-    supabase.from("iva_monthly").select("*"),
-    supabase.from("cheques").select("*"),
-  ]);
+type BankRow = {
+  id: string;
+  empresa_id: string;
+  nombre: string;
+  short: string;
+  color: string;
+  saldo_inicial: number | string;
+  orden: number;
+  activo: boolean;
+};
 
-  if (settingsRes.error) throw settingsRes.error;
-  if (projectionRes.error) throw projectionRes.error;
-  if (fciRes.error) throw fciRes.error;
-  if (ivaRes.error) throw ivaRes.error;
-  if (chequesRes.error) throw chequesRes.error;
+type EmpresaRow = { id: string; codigo: string; nombre: string; fci_saldo_inicial: number | string; orden: number };
 
-  const s = settingsRes.data;
-
-  const movements: Movement[] = movementsRows.map((row) => ({
+function toEmpresa(row: EmpresaRow): Empresa {
+  return {
     id: row.id,
-    bank: row.bank,
-    descripcion: row.descripcion,
-    proveedor: row.proveedor,
-    fechaEmision: row.fecha_emision ?? "",
-    fechaPago: row.fecha_pago,
-    cheque: row.cheque,
-    credito: Number(row.credito),
-    debito: Number(row.debito),
-    grupo: row.grupo,
-    transferId: row.transfer_id ?? null,
-  }));
+    codigo: row.codigo,
+    nombre: row.nombre,
+    fciSaldoInicial: Number(row.fci_saldo_inicial),
+    orden: row.orden,
+  };
+}
 
-  const projection: CashflowState["projection"] = {};
-  PROJ_CONCEPTS.forEach((c) => (projection[c.id] = {}));
-  projectionRes.data.forEach((row) => {
-    projection[row.concept_id][row.month_key] = { cantidad: Number(row.cantidad), precio: Number(row.precio) };
-  });
-
-  const fciData: CashflowState["fci"]["data"] = {};
-  fciRes.data.forEach((row) => {
-    fciData[row.month_key] = { suscripciones: Number(row.suscripciones), rescates: Number(row.rescates) };
-  });
-
-  const iva: CashflowState["iva"] = {};
-  IVA_ROWS.forEach((r) => (iva[r] = {}));
-  ivaRes.data.forEach((row) => {
-    iva[row.row_name][row.month_key] = Number(row.monto);
-  });
-
-  const cheques: Cheque[] = chequesRes.data.map((row) => ({
+function toBank(row: BankRow, empresas: Empresa[]): Bank {
+  const codigo = empresas.find((e) => e.id === row.empresa_id)?.codigo ?? "";
+  return {
     id: row.id,
+    empresaId: row.empresa_id,
+    name: row.nombre,
+    short: row.short,
+    label: bankLabel(codigo, row.short),
+    color: row.color,
+    saldoInicial: Number(row.saldo_inicial),
+    orden: row.orden,
+    activo: row.activo,
+  };
+}
+
+export function bankLabel(codigoEmpresa: string, short: string): string {
+  return codigoEmpresa ? `${codigoEmpresa} ${short}` : short;
+}
+
+type ChequeRow = {
+  id: string;
+  empresa_id: string;
+  cliente: string;
+  numero: string;
+  banco_emisor: string;
+  banco_destino: Cheque["bancoDestino"];
+  importe: number | string;
+  fecha_recepcion: string;
+  fecha_pago: string | null;
+  estado: Cheque["estado"];
+  fecha_deposito: string | null;
+  fecha_acreditacion: string | null;
+  fecha_rechazo: string | null;
+  fecha_endoso: string | null;
+  fecha_cesion: string | null;
+  endosado_a: string;
+  movement_id: string | null;
+};
+
+function toCheque(row: ChequeRow): Cheque {
+  return {
+    id: row.id,
+    empresaId: row.empresa_id,
     cliente: row.cliente,
     numero: row.numero,
     bancoEmisor: row.banco_emisor,
@@ -97,19 +111,80 @@ export async function fetchAllData(): Promise<CashflowState> {
     fechaCesion: row.fecha_cesion ?? "",
     endosadoA: row.endosado_a,
     movementId: row.movement_id ?? null,
+  };
+}
+
+export async function fetchAllData(): Promise<DbState> {
+  const [settingsRes, empresasRes, banksRes, movementsRows, projectionRes, fciRes, ivaRes, chequesRes] = await Promise.all([
+    supabase.from("settings").select("range_start, range_end").eq("id", 1).single(),
+    supabase.from("empresas").select("*").order("orden"),
+    supabase.from("banks").select("*").order("orden"),
+    fetchAllRows<MovementRow>("movements"),
+    supabase.from("projection_cells").select("*"),
+    supabase.from("fci_monthly").select("*"),
+    supabase.from("iva_monthly").select("*"),
+    supabase.from("cheques").select("*"),
+  ]);
+
+  if (settingsRes.error) throw settingsRes.error;
+  if (empresasRes.error) throw empresasRes.error;
+  if (banksRes.error) throw banksRes.error;
+  if (projectionRes.error) throw projectionRes.error;
+  if (fciRes.error) throw fciRes.error;
+  if (ivaRes.error) throw ivaRes.error;
+  if (chequesRes.error) throw chequesRes.error;
+
+  const empresas = (empresasRes.data as EmpresaRow[]).map(toEmpresa);
+  const banks = (banksRes.data as BankRow[]).map((r) => toBank(r, empresas));
+
+  const movements: Movement[] = movementsRows.map((row) => ({
+    id: row.id,
+    bank: row.bank,
+    descripcion: row.descripcion,
+    proveedor: row.proveedor,
+    fechaEmision: row.fecha_emision ?? "",
+    fechaPago: row.fecha_pago,
+    cheque: row.cheque,
+    credito: Number(row.credito),
+    debito: Number(row.debito),
+    grupo: row.grupo,
+    transferId: row.transfer_id ?? null,
   }));
 
+  const projection: DbState["projection"] = {};
+  const fci: DbState["fci"] = {};
+  const iva: DbState["iva"] = {};
+  empresas.forEach((e) => {
+    projection[e.id] = {};
+    PROJ_CONCEPTS.forEach((c) => (projection[e.id][c.id] = {}));
+    fci[e.id] = {};
+    iva[e.id] = {};
+    IVA_ROWS.forEach((r) => (iva[e.id][r] = {}));
+  });
+
+  projectionRes.data.forEach((row) => {
+    (projection[row.empresa_id][row.concept_id] ??= {})[row.month_key] = {
+      cantidad: Number(row.cantidad),
+      precio: Number(row.precio),
+    };
+  });
+  fciRes.data.forEach((row) => {
+    fci[row.empresa_id][row.month_key] = { suscripciones: Number(row.suscripciones), rescates: Number(row.rescates) };
+  });
+  ivaRes.data.forEach((row) => {
+    (iva[row.empresa_id][row.row_name] ??= {})[row.month_key] = Number(row.monto);
+  });
+
   return {
-    settings: {
-      saldoInicial: { galicia: Number(s.saldo_inicial_galicia), nacion: Number(s.saldo_inicial_nacion) },
-      rangeStart: s.range_start,
-      rangeEnd: s.range_end,
-    },
+    empresas,
+    banks,
+    rangeStart: settingsRes.data.range_start,
+    rangeEnd: settingsRes.data.range_end,
     movements,
+    cheques: (chequesRes.data as ChequeRow[]).map(toCheque),
     projection,
-    fci: { saldoInicial: Number(s.fci_saldo_inicial), data: fciData },
+    fci,
     iva,
-    cheques,
   };
 }
 
@@ -206,6 +281,7 @@ export async function deleteMovement(id: string): Promise<void> {
 }
 
 export async function upsertProjectionCell(
+  empresaId: EmpresaId,
   conceptId: string,
   monthKey: string,
   cantidad: number,
@@ -213,26 +289,29 @@ export async function upsertProjectionCell(
 ): Promise<void> {
   const { error } = await supabase
     .from("projection_cells")
-    .upsert({ concept_id: conceptId, month_key: monthKey, cantidad, precio });
+    .upsert({ empresa_id: empresaId, concept_id: conceptId, month_key: monthKey, cantidad, precio });
   if (error) throw error;
 }
 
-export async function deleteProjectionCell(conceptId: string, monthKey: string): Promise<void> {
+export async function deleteProjectionCell(empresaId: EmpresaId, conceptId: string, monthKey: string): Promise<void> {
   const { error } = await supabase
     .from("projection_cells")
     .delete()
+    .eq("empresa_id", empresaId)
     .eq("concept_id", conceptId)
     .eq("month_key", monthKey);
   if (error) throw error;
 }
 
 export async function upsertFciMonthly(
+  empresaId: EmpresaId,
   monthKey: string,
   field: "suscripciones" | "rescates",
   value: number,
   current: { suscripciones: number; rescates: number }
 ): Promise<void> {
   const next = {
+    empresa_id: empresaId,
     month_key: monthKey,
     suscripciones: field === "suscripciones" ? value : current.suscripciones,
     rescates: field === "rescates" ? value : current.rescates,
@@ -241,36 +320,61 @@ export async function upsertFciMonthly(
   if (error) throw error;
 }
 
-export async function upsertIvaMonthly(rowName: string, monthKey: string, monto: number): Promise<void> {
+export async function upsertIvaMonthly(empresaId: EmpresaId, rowName: string, monthKey: string, monto: number): Promise<void> {
   if (monto === 0) {
-    const { error } = await supabase.from("iva_monthly").delete().eq("row_name", rowName).eq("month_key", monthKey);
+    const { error } = await supabase
+      .from("iva_monthly")
+      .delete()
+      .eq("empresa_id", empresaId)
+      .eq("row_name", rowName)
+      .eq("month_key", monthKey);
     if (error) throw error;
     return;
   }
-  const { error } = await supabase.from("iva_monthly").upsert({ row_name: rowName, month_key: monthKey, monto });
+  const { error } = await supabase.from("iva_monthly").upsert({ empresa_id: empresaId, row_name: rowName, month_key: monthKey, monto });
   if (error) throw error;
 }
 
-export async function updateSettings(settings: CashflowState["settings"]): Promise<void> {
+export async function updateRange(rangeStart: string, rangeEnd: string): Promise<void> {
+  const { error } = await supabase.from("settings").update({ range_start: rangeStart, range_end: rangeEnd }).eq("id", 1);
+  if (error) throw error;
+}
+
+export async function updateEmpresa(e: Empresa): Promise<void> {
   const { error } = await supabase
-    .from("settings")
-    .update({
-      saldo_inicial_galicia: settings.saldoInicial.galicia,
-      saldo_inicial_nacion: settings.saldoInicial.nacion,
-      range_start: settings.rangeStart,
-      range_end: settings.rangeEnd,
-    })
-    .eq("id", 1);
+    .from("empresas")
+    .update({ codigo: e.codigo, nombre: e.nombre, fci_saldo_inicial: e.fciSaldoInicial })
+    .eq("id", e.id);
   if (error) throw error;
 }
 
-export async function updateFciSaldoInicial(value: number): Promise<void> {
-  const { error } = await supabase.from("settings").update({ fci_saldo_inicial: value }).eq("id", 1);
+function bankToRow(b: Omit<Bank, "label">) {
+  return {
+    id: b.id,
+    empresa_id: b.empresaId,
+    nombre: b.name,
+    short: b.short,
+    color: b.color,
+    saldo_inicial: b.saldoInicial,
+    orden: b.orden,
+    activo: b.activo,
+  };
+}
+
+export async function updateBank(b: Bank): Promise<void> {
+  const { id, ...row } = bankToRow(b);
+  const { error } = await supabase.from("banks").update(row).eq("id", id);
+  if (error) throw error;
+}
+
+export async function insertBank(b: Omit<Bank, "label">): Promise<void> {
+  const { error } = await supabase.from("banks").insert(bankToRow(b));
   if (error) throw error;
 }
 
 function chequeToRow(c: Omit<Cheque, "id">) {
   return {
+    empresa_id: c.empresaId,
     cliente: c.cliente,
     numero: c.numero,
     banco_emisor: c.bancoEmisor,
@@ -292,24 +396,7 @@ function chequeToRow(c: Omit<Cheque, "id">) {
 export async function insertCheque(c: Omit<Cheque, "id">): Promise<Cheque> {
   const { data, error } = await supabase.from("cheques").insert(chequeToRow(c)).select().single();
   if (error) throw error;
-  return {
-    id: data.id,
-    cliente: data.cliente,
-    numero: data.numero,
-    bancoEmisor: data.banco_emisor,
-    bancoDestino: data.banco_destino,
-    importe: Number(data.importe),
-    fechaRecepcion: data.fecha_recepcion,
-    fechaPago: data.fecha_pago ?? "",
-    estado: data.estado,
-    fechaDeposito: data.fecha_deposito ?? "",
-    fechaAcreditacion: data.fecha_acreditacion ?? "",
-    fechaRechazo: data.fecha_rechazo ?? "",
-    fechaEndoso: data.fecha_endoso ?? "",
-    fechaCesion: data.fecha_cesion ?? "",
-    endosadoA: data.endosado_a,
-    movementId: data.movement_id ?? null,
-  };
+  return toCheque(data as ChequeRow);
 }
 
 export async function updateCheque(c: Cheque): Promise<void> {
@@ -320,66 +407,4 @@ export async function updateCheque(c: Cheque): Promise<void> {
 export async function deleteCheque(id: string): Promise<void> {
   const { error } = await supabase.from("cheques").delete().eq("id", id);
   if (error) throw error;
-}
-
-export async function resetToSeed(): Promise<void> {
-  await supabase.from("movements").delete().not("id", "is", null);
-  await supabase.from("projection_cells").delete().not("concept_id", "is", null);
-  await supabase.from("fci_monthly").delete().not("month_key", "is", null);
-  await supabase.from("iva_monthly").delete().not("row_name", "is", null);
-  await supabase.from("cheques").delete().not("id", "is", null);
-
-  const settings = seedSettings();
-  const fci = seedFci();
-  await supabase
-    .from("settings")
-    .update({
-      saldo_inicial_galicia: settings.saldoInicial.galicia,
-      saldo_inicial_nacion: settings.saldoInicial.nacion,
-      range_start: settings.rangeStart,
-      range_end: settings.rangeEnd,
-      fci_saldo_inicial: fci.saldoInicial,
-    })
-    .eq("id", 1);
-
-  const movements = seedMovements().map((m) => ({
-    bank: m.bank,
-    descripcion: m.descripcion,
-    proveedor: m.proveedor,
-    fecha_emision: m.fechaEmision || null,
-    fecha_pago: m.fechaPago,
-    cheque: m.cheque,
-    credito: m.credito,
-    debito: m.debito,
-    grupo: m.grupo,
-  }));
-  await supabase.from("movements").insert(movements);
-
-  const projection = seedProjection();
-  const projectionRows: { concept_id: string; month_key: string; cantidad: number; precio: number }[] = [];
-  Object.entries(projection).forEach(([conceptId, months]) => {
-    Object.entries(months).forEach(([monthKey, v]) => {
-      projectionRows.push({ concept_id: conceptId, month_key: monthKey, cantidad: v.cantidad, precio: v.precio });
-    });
-  });
-  if (projectionRows.length) await supabase.from("projection_cells").insert(projectionRows);
-
-  const fciRows = Object.entries(fci.data).map(([monthKey, v]) => ({
-    month_key: monthKey,
-    suscripciones: v.suscripciones,
-    rescates: v.rescates,
-  }));
-  if (fciRows.length) await supabase.from("fci_monthly").insert(fciRows);
-
-  const iva = seedIva();
-  const ivaRows: { row_name: string; month_key: string; monto: number }[] = [];
-  Object.entries(iva).forEach(([rowName, months]) => {
-    Object.entries(months).forEach(([monthKey, monto]) => {
-      ivaRows.push({ row_name: rowName, month_key: monthKey, monto });
-    });
-  });
-  if (ivaRows.length) await supabase.from("iva_monthly").insert(ivaRows);
-
-  const cheques = seedCheques().map(chequeToRow);
-  if (cheques.length) await supabase.from("cheques").insert(cheques);
 }

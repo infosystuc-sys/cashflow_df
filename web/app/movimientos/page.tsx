@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCashflow } from "@/context/CashflowContext";
 import { bankRows, bankSummary } from "@/lib/calc";
-import { BANKS, GROUPS, TRANSFER_OWN_BANK_GROUP } from "@/lib/constants";
+import { GROUPS, TRANSFER_OWN_BANK_GROUP } from "@/lib/constants";
 import { money, norm } from "@/lib/format";
 import { monthLabel } from "@/lib/dates";
 import { downloadXlsx, exDate, type Cell } from "@/lib/export";
@@ -38,8 +38,16 @@ const SEARCH_COLS: { id: SearchCol; label: string }[] = [
 const FILTER_GROUPS = GROUPS.filter((g) => g !== "Saldo Inicial");
 
 export default function MovimientosPage() {
-  const { state, addMovement, addMovements, updateMovement, deleteMovement } = useCashflow();
-  const [bankId, setBankId] = useState<BankId>("galicia");
+  const { state, db, addMovement, addMovements, updateMovement, deleteMovement } = useCashflow();
+  const [bankSel, setBankId] = useState<BankId | null>(null);
+
+  // Pestañas: bancos de la vista activos, más los inactivos que tengan movimientos.
+  const tabBanks = useMemo(
+    () => (state ? state.banks.filter((bk) => bk.activo || state.movements.some((m) => m.bank === bk.id)) : []),
+    [state]
+  );
+  // Al cambiar de empresa el banco elegido puede quedar fuera de la vista: se usa el primero.
+  const bankId: BankId = tabBanks.some((bk) => bk.id === bankSel) ? bankSel! : tabBanks[0]?.id ?? "";
   const [editing, setEditing] = useState<Movement | "new" | null>(null);
   const [confirm, setConfirm] = useState<Movement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -60,11 +68,11 @@ export default function MovimientosPage() {
   const summary = useMemo(() => (state ? bankSummary(state, bankId) : null), [state, bankId]);
 
   const editingCounterpart = useMemo(() => {
-    if (!state || !editing || editing === "new" || !editing.transferId) return null;
-    return state.movements.find((m) => m.transferId === editing.transferId && m.id !== editing.id) ?? null;
-  }, [state, editing]);
+    if (!db || !editing || editing === "new" || !editing.transferId) return null;
+    return db.movements.find((m) => m.transferId === editing.transferId && m.id !== editing.id) ?? null;
+  }, [db, editing]);
 
-  const linkedBankName = editingCounterpart ? BANKS.find((b) => b.id === editingCounterpart.bank)?.name : undefined;
+  const linkedBankName = editingCounterpart ? db?.banks.find((b) => b.id === editingCounterpart.bank)?.label : undefined;
 
   // Meses con datos (ambos bancos), ordenados, para navegar por bloques de mes.
   const months = useMemo(() => {
@@ -131,9 +139,9 @@ export default function MovimientosPage() {
   }, [rows, filtered, firstIdx, summary]);
 
   const confirmCounterpart = useMemo(() => {
-    if (!state || !confirm || !confirm.transferId) return null;
-    return state.movements.find((m) => m.transferId === confirm.transferId && m.id !== confirm.id) ?? null;
-  }, [state, confirm]);
+    if (!db || !confirm || !confirm.transferId) return null;
+    return db.movements.find((m) => m.transferId === confirm.transferId && m.id !== confirm.id) ?? null;
+  }, [db, confirm]);
 
   // Mide la altura real del bloque superior (título, pestañas, resumen, filtros) y la
   // expone como variable CSS, para que el encabezado de la tabla sepa a qué altura
@@ -153,7 +161,19 @@ export default function MovimientosPage() {
 
   if (!state || !summary) return null;
 
-  const b = BANKS.find((x) => x.id === bankId)!;
+  const b = state.banks.find((x) => x.id === bankId);
+  if (!b) {
+    return (
+      <div className="view">
+        <div className="view-head">
+          <div>
+            <h1>Movimientos</h1>
+            <p className="view-sub">No hay bancos activos para esta empresa. Agregalos en Ajustes.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
   const hasFilters = search.trim() !== "" || grupo !== "todas" || selMonth !== "todos";
 
   const monthIdx = months.indexOf(selMonth);
@@ -225,15 +245,15 @@ export default function MovimientosPage() {
   const exportExcel = () => {
     const header: Cell[] = ["Descripción", "Proveedor / Cliente", "Banco", "F. emisión", "F. pago", "Cheque", "Agrupación", "Crédito", "Débito", "Saldo"];
     const aoa: Cell[][] = [header];
-    aoa.push(["Saldo Inicial", "", b.name, "", "", "", "", "", "", viewSummary.inicial]);
+    aoa.push(["Saldo Inicial", "", b.label, "", "", "", "", "", "", viewSummary.inicial]);
     filtered.forEach((r) => {
       aoa.push([
-        r.descripcion, r.proveedor, b.name, exDate(r.fechaEmision), exDate(r.fechaPago), r.cheque, r.grupo,
+        r.descripcion, r.proveedor, b.label, exDate(r.fechaEmision), exDate(r.fechaPago), r.cheque, r.grupo,
         r.credito || null, r.debito || null, r.saldo,
       ]);
     });
     const suffix = selMonth === "todos" ? "todos" : selMonth;
-    downloadXlsx(`Movimientos_${b.short}_${suffix}`, [{ name: `${b.short} ${suffix}`, aoa }]);
+    downloadXlsx(`Movimientos_${b.label.replace(/\s+/g, "_")}_${suffix}`, [{ name: `${b.label} ${suffix}`, aoa }]);
   };
 
   const onImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -293,20 +313,20 @@ export default function MovimientosPage() {
         </div>
 
         <div className="bank-tabs">
-          {BANKS.map((bk) => (
+          {tabBanks.map((bk) => (
             <button
               key={bk.id}
               className={"bank-tab" + (bankId === bk.id ? " active" : "")}
               style={{ "--bk": bk.color } as React.CSSProperties}
               onClick={() => setBankId(bk.id)}
             >
-              <span className="bank-dot"></span>{bk.name}
+              <span className="bank-dot"></span>{bk.label}
               <span className="bank-count">{state.movements.filter((m) => m.bank === bk.id).length}</span>
             </button>
           ))}
         </div>
 
-        <BankSummaryCard summary={viewSummary} bankId={bankId} />
+        <BankSummaryCard summary={viewSummary} bank={b} />
 
         <div className="mov-filters">
           <div className="filt filt--search">
@@ -414,7 +434,7 @@ export default function MovimientosPage() {
 
       {editing && (
         <MovEditor
-          bankId={bankId}
+          bank={b}
           initial={editing === "new" ? null : editing}
           linkedBankName={linkedBankName}
           onSave={saveMov}
@@ -424,7 +444,7 @@ export default function MovimientosPage() {
       )}
       {confirm && confirmCounterpart && (
         <Confirm
-          message={`"${confirm.descripcion}" está vinculado con ${BANKS.find((b) => b.id === confirmCounterpart.bank)?.name}. ¿Qué querés eliminar?`}
+          message={`"${confirm.descripcion}" está vinculado con ${db?.banks.find((x) => x.id === confirmCounterpart.bank)?.label}. ¿Qué querés eliminar?`}
           yesLabel="Eliminar los dos"
           onYes={delBoth}
           onNo={() => setConfirm(null)}

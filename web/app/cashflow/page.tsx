@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useMemo, useState } from "react";
-import { useCashflow } from "@/context/CashflowContext";
+import { useCashflow, useVistaLabel } from "@/context/CashflowContext";
 import { buildCashflow, projTotal } from "@/lib/calc";
 import { monthLabel } from "@/lib/dates";
 import { PROJ_CONCEPTS, IVA_ROWS, TRANSFER_OWN_BANK_GROUP } from "@/lib/constants";
@@ -96,6 +96,7 @@ function CfSectionRow({ label, months, accent }: { label: string; months: string
 
 export default function CashflowPage() {
   const { state } = useCashflow();
+  const vistaLabel = useVistaLabel();
   const cf = useMemo(() => (state ? buildCashflow(state) : { months: [], rows: [] }), [state]);
   const months = cf.months;
   const rows = cf.rows;
@@ -181,14 +182,14 @@ export default function CashflowPage() {
     IVA_ROWS.forEach((rn) => row(rn, (r) => st.iva[rn]?.[r.key] || 0));
     row("S/ Libro IVA Ventas", (r) => IVA_ROWS.reduce((a, rn) => a + (st.iva[rn]?.[r.key] || 0), 0));
 
-    downloadXlsx("Cashflow", [{ name: "Cashflow", aoa }]);
+    downloadXlsx(`Cashflow_${vistaLabel.short}`, [{ name: "Cashflow", aoa }]);
   };
 
   return (
     <div className="view">
       <div className="view-head">
         <div>
-          <h1>Cashflow · Resumen</h1>
+          <h1>Cashflow · {vistaLabel.label}</h1>
           <p className="view-sub">
             {monthLabel(state.settings.rangeStart)} → {monthLabel(state.settings.rangeEnd)} · recalculado desde Movimientos y Proyección.
           </p>

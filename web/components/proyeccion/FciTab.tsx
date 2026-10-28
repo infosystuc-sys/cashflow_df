@@ -14,7 +14,7 @@ const FIELDS: { id: "suscripciones" | "rescates"; label: string; cls: string }[]
   { id: "rescates", label: "Rescates", cls: "neg" },
 ];
 
-export function FciTab({ state, months }: { state: CashflowState; months: string[] }) {
+export function FciTab({ state, months, readOnly }: { state: CashflowState; months: string[]; readOnly?: boolean }) {
   const { setFciCell, setFciSaldoInicial } = useCashflow();
   const [edit, setEdit] = useState<{ field: "suscripciones" | "rescates"; monthKey: string } | null>(null);
 
@@ -38,7 +38,11 @@ export function FciTab({ state, months }: { state: CashflowState; months: string
       <div className="inline-setting">
         <span>Saldo Inicial FCI</span>
         <span className="inline-money">
-          <MoneyInput value={state.fci.saldoInicial} onChange={setFciSaldoInicial} />
+          {readOnly ? (
+            <Money v={state.fci.saldoInicial} decimals={false} bold />
+          ) : (
+            <MoneyInput value={state.fci.saldoInicial} onChange={setFciSaldoInicial} />
+          )}
         </span>
       </div>
       <MatrixShell months={months} firstColLabel="FCI / Inversiones">
@@ -55,8 +59,8 @@ export function FciTab({ state, months }: { state: CashflowState; months: string
             {months.map((mk) => {
               const v = (state.fci.data[mk] ?? { suscripciones: 0, rescates: 0 })[f.id];
               return (
-                <td key={mk} className={"c-cell" + (v ? " has" : "")} onClick={() => setEdit({ field: f.id, monthKey: mk })}>
-                  {v ? <span className="cell-amt">{money(v, false)}</span> : <span className="cell-add">+</span>}
+                <td key={mk} className={"c-cell" + (v ? " has" : "")} onClick={readOnly ? undefined : () => setEdit({ field: f.id, monthKey: mk })}>
+                  {v ? <span className="cell-amt">{money(v, false)}</span> : readOnly ? null : <span className="cell-add">+</span>}
                 </td>
               );
             })}
