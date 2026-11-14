@@ -10,6 +10,7 @@ import { Money, Confirm } from "@/components/ui";
 import { ChequeEditor } from "@/components/cheques/ChequeEditor";
 import { ChequeActionModal, type ChequeActionExtra } from "@/components/cheques/ChequeActionModal";
 import { ChequeSummaryCard } from "@/components/cheques/ChequeSummaryCard";
+import { CHEQUE_SEARCH_COLS, chequeCoincide, type ChequeSearchCol } from "@/lib/buscarCheques";
 
 type Accion = "depositar" | "endosar" | "cesionar" | "rechazar";
 
@@ -51,6 +52,8 @@ function fmtDate(iso: string) {
 export default function ChequesPage() {
   const { state, db, vista, addCheque, updateCheque, deleteCheque, addMovement, updateMovement, deleteMovement } = useCashflow();
   const [filtro, setFiltro] = useState<ChequeEstado | "todos">("todos");
+  const [searchCol, setSearchCol] = useState<ChequeSearchCol>("todas");
+  const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<Cheque | "new" | null>(null);
   const [accion, setAccion] = useState<{ cheque: Cheque; accion: Accion } | null>(null);
   const [confirm, setConfirm] = useState<Cheque | null>(null);
@@ -59,9 +62,11 @@ export default function ChequesPage() {
 
   const rows = useMemo(() => {
     if (!state) return [];
-    const filtered = filtro === "todos" ? state.cheques : state.cheques.filter((c) => c.estado === filtro);
+    const filtered = state.cheques.filter(
+      (c) => (filtro === "todos" || c.estado === filtro) && chequeCoincide(c, searchCol, search)
+    );
     return [...filtered].sort((a, b) => (a.fechaRecepcion < b.fechaRecepcion ? -1 : a.fechaRecepcion > b.fechaRecepcion ? 1 : 0));
-  }, [state, filtro]);
+  }, [state, filtro, searchCol, search]);
 
   if (!state || !db || !resumen) return null;
 
@@ -186,6 +191,28 @@ export default function ChequesPage() {
         ))}
       </div>
 
+      <div className="mov-filters">
+        <div className="filt filt--search">
+          <span className="filt-label">Buscar cheque</span>
+          <div className="filt-search-row">
+            <select className="inp" value={searchCol} onChange={(e) => setSearchCol(e.target.value as ChequeSearchCol)}>
+              {CHEQUE_SEARCH_COLS.map((c) => (
+                <option key={c.id} value={c.id}>{c.label}</option>
+              ))}
+            </select>
+            <input
+              className="inp"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="N° de cheque, a nombre de quién o monto…"
+            />
+          </div>
+        </div>
+        {search.trim() !== "" && (
+          <button className="btn btn--ghost filt-clear" onClick={() => setSearch("")}>Limpiar búsqueda</button>
+        )}
+      </div>
+
       <div className="table-wrap">
         <table className="grid mov-table">
           <thead>
@@ -235,7 +262,7 @@ export default function ChequesPage() {
               </tr>
             ))}
             {rows.length === 0 && (
-              <tr><td colSpan={10} className="empty">Sin cheques para este filtro. Agregá el primero con “+ Nuevo cheque”.</td></tr>
+              <tr><td colSpan={10} className="empty">{search.trim() ? "Ningún cheque coincide con la búsqueda." : "Sin cheques para este filtro. Agregá el primero con “+ Nuevo cheque”."}</td></tr>
             )}
           </tbody>
         </table>
